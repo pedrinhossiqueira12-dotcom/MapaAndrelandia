@@ -2,43 +2,35 @@
 =========================================================
 MAPA INTERATIVO DE ANDRELÂNDIA
 marcadores.js
-Versão 1.0
+Versão 3.0
 =========================================================
 */
 
 /*
 =========================================================
-CAMADAS DE MARCADORES
+VARIÁVEIS
 =========================================================
 */
 
-const camadaLocais = L.layerGroup();
+let marcadorSelecionado = null;
 
-const camadaComercios = L.layerGroup();
-
-/*
-=========================================================
-ÍCONES
-=========================================================
-*/
-
-const cacheIcones = {};
+let grupoMarcadores = null;
 
 /*
 =========================================================
-INICIALIZAÇÃO
+INICIAR
 =========================================================
 */
 
 function iniciarMarcadores(){
 
-    camadaLocais.addTo(mapa);
+    grupoMarcadores = L.layerGroup();
 
-    camadaComercios.addTo(mapa);
+    grupoMarcadores.addTo(mapa);
 
-    carregarLocais();
+    criarMarcadoresLocais();
 
-    carregarComercios();
+    criarMarcadoresComercios();
 
 }
 
@@ -48,19 +40,23 @@ LOCAIS
 =========================================================
 */
 
-function carregarLocais(){
+function criarMarcadoresLocais(){
 
-    if(!Array.isArray(locais)){
+    locais.forEach(
 
-        return;
+        local=>{
 
-    }
+            criarMarcador(
 
-    locais.forEach(local=>{
+                local,
 
-        criarMarcador(local,"local");
+                "local"
 
-    });
+            );
+
+        }
+
+    );
 
 }
 
@@ -70,19 +66,23 @@ COMÉRCIOS
 =========================================================
 */
 
-function carregarComercios(){
+function criarMarcadoresComercios(){
 
-    if(!Array.isArray(comercios)){
+    comercios.forEach(
 
-        return;
+        comercio=>{
 
-    }
+            criarMarcador(
 
-    comercios.forEach(comercio=>{
+                comercio,
 
-        criarMarcador(comercio,"comercio");
+                "comercio"
 
-    });
+            );
+
+        }
+
+    );
 
 }
 
@@ -92,41 +92,39 @@ CRIAR MARCADOR
 =========================================================
 */
 
-function criarMarcador(item,tipo){
+function criarMarcador(
 
-    if(item.visivel===false){
+    dados,
 
-        return;
+    tipo
 
-    }
-
-    if(item.latitude===undefined || item.longitude===undefined){
-
-        return;
-
-    }
+){
 
     const marcador = L.marker(
 
         [
 
-            item.latitude,
+            dados.latitude,
 
-            item.longitude
+            dados.longitude
 
         ],
 
         {
 
-            icon:criarDivIcon(item)
+            icon:criarIcone(
+
+                dados
+
+            )
 
         }
 
     );
 
-    marcador.dados=item;
+    marcador.dados = dados;
 
-    marcador.tipo=tipo;
+    marcador.tipo = tipo;
 
     marcador.on(
 
@@ -134,166 +132,197 @@ function criarMarcador(item,tipo){
 
         ()=>{
 
-            abrirPopup(marcador);
+            selecionarMarcador(
+
+                marcador
+
+            );
 
         }
 
     );
 
-    if(tipo==="local"){
+    marcador.addTo(
 
-        camadaLocais.addLayer(marcador);
+        grupoMarcadores
 
-    }else{
+    );
 
-        camadaComercios.addLayer(marcador);
+    marcadores.push(
+
+        marcador
+
+    );
+
+}
+/*
+=========================================================
+ÍCONE PERSONALIZADO
+=========================================================
+*/
+
+function criarIcone(dados){
+
+    const icone =
+
+        dados.icone
+
+        ||
+
+        CONFIG.caminhos.icones +
+
+        "padrao.svg";
+
+    return L.divIcon(
+
+        {
+
+            className:"marker-wrapper",
+
+            html:`
+
+                <div class="marker">
+
+                    <div class="marker-shadow"></div>
+
+                    <div class="marker-icon">
+
+                        <img
+
+                            src="${icone}"
+
+                            alt="${dados.nome}"
+
+                            draggable="false">
+
+                    </div>
+
+                </div>
+
+            `,
+
+            iconSize:[44,56],
+
+            iconAnchor:[22,50],
+
+            popupAnchor:[0,-42]
+
+        }
+
+    );
+
+}
+
+/*
+=========================================================
+SELECIONAR
+=========================================================
+*/
+
+function selecionarMarcador(marcador){
+
+    limparMarcadorSelecionado();
+
+    marcadorSelecionado = marcador;
+
+    const elemento = marcador.getElement();
+
+    if(elemento){
+
+        elemento
+
+            .querySelector(".marker")
+
+            .classList
+
+            .add("marker-selecionado");
 
     }
 
-    marcadores.push(marcador);
+    centralizarMapa(
 
-}
+        marcador.getLatLng().lat,
 
-/*
-=========================================================
-ÍCONE
-=========================================================
-*/
+        marcador.getLatLng().lng,
 
-function getIcone(item){
+        18
 
-    const nome=item.icone || "padrao.svg";
+    );
 
-    if(cacheIcones[nome]){
+    if(typeof abrirSheet==="function"){
 
-        return cacheIcones[nome];
+        abrirSheet(
+
+            marcador.dados
+
+        );
 
     }
 
-    const icone=L.icon({
-
-        iconUrl:CONFIG.caminhos.icones + nome,
-
-        iconSize:[34,42],
-
-        iconAnchor:[17,42],
-
-        popupAnchor:[0,-38]
-
-    });
-
-    cacheIcones[nome]=icone;
-
-    return icone;
-
-}
-/*
-=========================================================
-POPUP
-=========================================================
-*/
-
-function abrirPopup(marcador){
-
-    destacarMarcador(
-
-        marcador.dados.id
-
-    );
-
-    abrirSheet(
-
-        marcador.dados
-
-    );
-
 }
 
 /*
 =========================================================
-HTML DO POPUP
+LIMPAR SELEÇÃO
 =========================================================
 */
 
-function criarPopup(item){
+function limparMarcadorSelecionado(){
 
-    const foto = item.foto || "img/interface/sem-foto.webp";
+    if(!marcadorSelecionado){
 
-    const categoria = item.categoria || "";
+        return;
 
-    const descricao = item.descricaoCurta || "";
+    }
 
-    const pagina = item.pagina || "#";
+    const elemento =
 
-    return `
+        marcadorSelecionado.getElement();
 
-<div class="popup">
+    if(elemento){
 
-    <div class="popup-foto">
+        elemento
 
-        <img
-            src="${foto}"
-            loading="lazy">
+            .querySelector(".marker")
 
-    </div>
+            .classList
 
-    <div class="popup-conteudo">
+            .remove("marker-selecionado");
 
-        <h2>${item.nome}</h2>
+    }
 
-        <span class="popup-categoria">
+    marcadorSelecionado = null;
 
-            ${categoria}
+}
+/*
+=========================================================
+OBTER MARCADOR PELO ID
+=========================================================
+*/
 
-        </span>
+function obterMarcador(id){
 
-        <p>
+    return marcadores.find(
 
-            ${descricao}
+        marcador=>{
 
-        </p>
+            return marcador.dados.id===id;
 
-        <button
-            class="popup-botao"
-            onclick="abrirPagina('${pagina}')">
+        }
 
-            Ver detalhes
-
-        </button>
-
-    </div>
-
-</div>
-
-`;
+    ) || null;
 
 }
 
 /*
 =========================================================
-ABRIR PÁGINA
+SELECIONAR PELO ID
 =========================================================
 */
 
-function abrirPagina(url){
+function selecionarMarcadorPorId(id){
 
-    window.location.href = url;
-
-}
-
-/*
-=========================================================
-LOCALIZAR MARCADOR
-=========================================================
-*/
-
-function localizarMarcador(id){
-
-    const marcador = marcadores.find(
-
-        m => m.dados.id === id
-
-    );
+    const marcador = obterMarcador(id);
 
     if(!marcador){
 
@@ -301,41 +330,103 @@ function localizarMarcador(id){
 
     }
 
-    mapa.flyTo(
-
-        marcador.getLatLng(),
-
-        18,
-
-        {
-
-            animate:true,
-
-            duration:CONFIG.animacao
-
-        }
-
-    );
-
-    setTimeout(()=>{
-
-        abrirPopup(marcador);
-
-    },500);
+    selecionarMarcador(marcador);
 
 }
 
 /*
 =========================================================
-OBTER MARCADOR
+FILTRO POR CATEGORIA
 =========================================================
 */
 
-function getMarcador(id){
+function atualizarMarcadoresCategorias(categorias){
 
-    return marcadores.find(
+    marcadores.forEach(
 
-        marcador => marcador.dados.id===id
+        marcador=>{
+
+            const categoria = marcador.dados.categoria;
+
+            if(categorias.includes(categoria)){
+
+                if(!grupoMarcadores.hasLayer(marcador)){
+
+                    grupoMarcadores.addLayer(marcador);
+
+                }
+
+            }else{
+
+                if(grupoMarcadores.hasLayer(marcador)){
+
+                    grupoMarcadores.removeLayer(marcador);
+
+                }
+
+            }
+
+        }
+
+    );
+
+}
+
+/*
+=========================================================
+MOSTRAR TIPO
+=========================================================
+*/
+
+function mostrarTipo(tipo){
+
+    marcadores.forEach(
+
+        marcador=>{
+
+            if(marcador.tipo!==tipo){
+
+                return;
+
+            }
+
+            if(!grupoMarcadores.hasLayer(marcador)){
+
+                grupoMarcadores.addLayer(marcador);
+
+            }
+
+        }
+
+    );
+
+}
+
+/*
+=========================================================
+ESCONDER TIPO
+=========================================================
+*/
+
+function esconderTipo(tipo){
+
+    marcadores.forEach(
+
+        marcador=>{
+
+            if(marcador.tipo!==tipo){
+
+                return;
+
+            }
+
+            if(grupoMarcadores.hasLayer(marcador)){
+
+                grupoMarcadores.removeLayer(marcador);
+
+            }
+
+        }
 
     );
 
@@ -349,39 +440,39 @@ MOSTRAR TODOS
 
 function mostrarTodosMarcadores(){
 
-    camadaLocais.addTo(mapa);
+    marcadores.forEach(
 
-    camadaComercios.addTo(mapa);
+        marcador=>{
 
-}
+            if(!grupoMarcadores.hasLayer(marcador)){
 
-/*
-=========================================================
-OCULTAR TODOS
-=========================================================
-*/
+                grupoMarcadores.addLayer(marcador);
 
-function ocultarTodosMarcadores(){
+            }
 
-    mapa.removeLayer(camadaLocais);
+        }
 
-    mapa.removeLayer(camadaComercios);
+    );
 
 }
 
 /*
 =========================================================
-REMOVER POPUPS
+ESCONDER TODOS
 =========================================================
 */
 
-function fecharTodosPopups(){
+function esconderTodosMarcadores(){
 
     marcadores.forEach(
 
         marcador=>{
 
-            marcador.closePopup();
+            if(grupoMarcadores.hasLayer(marcador)){
+
+                grupoMarcadores.removeLayer(marcador);
+
+            }
 
         }
 
@@ -390,46 +481,224 @@ function fecharTodosPopups(){
 }
 /*
 =========================================================
-CRIAR DIVICON
+ATUALIZAR ZOOM DOS MARCADORES
 =========================================================
 */
 
-function criarDivIcon(item){
+function atualizarZoomMarcadores(){
 
-    const icone = item.icone || "padrao.svg";
+    if(!mapa){
 
-    return L.divIcon({
+        return;
 
-        className:"marker-wrapper",
+    }
 
-        html:`
+    const zoom = mapa.getZoom();
 
-            <div
-                class="marker"
-                data-id="${item.id}">
+    let escala = 1;
 
-                <div class="marker-shadow"></div>
+    if(zoom <= 14){
 
-                <div class="marker-icon">
+        escala = 0.82;
 
-                    <img
-                        src="${CONFIG.caminhos.icones}${icone}"
-                        loading="lazy"
-                        draggable="false">
+    }else if(zoom <= 15){
 
-                </div>
+        escala = 0.90;
 
-            </div>
+    }else if(zoom <= 16){
 
-        `,
+        escala = 1;
 
-        iconSize:[44,56],
+    }else if(zoom <= 17){
 
-        iconAnchor:[22,52],
+        escala = 1.08;
 
-        popupAnchor:[0,-42]
+    }else if(zoom <= 18){
 
-    });
+        escala = 1.15;
+
+    }else{
+
+        escala = 1.22;
+
+    }
+
+    marcadores.forEach(
+
+        marcador=>{
+
+            const elemento = marcador.getElement();
+
+            if(!elemento){
+
+                return;
+
+            }
+
+            const marker = elemento.querySelector(
+
+                ".marker"
+
+            );
+
+            if(!marker){
+
+                return;
+
+            }
+
+            if(marker.classList.contains("marker-selecionado")){
+
+                return;
+
+            }
+
+            marker.style.transform =
+
+                `scale(${escala})`;
+
+        }
+
+    );
+
+}
+
+/*
+=========================================================
+ATUALIZAR SELEÇÃO
+=========================================================
+*/
+
+function atualizarMarcadorSelecionado(){
+
+    if(!marcadorSelecionado){
+
+        return;
+
+    }
+
+    if(
+
+        !grupoMarcadores.hasLayer(
+
+            marcadorSelecionado
+
+        )
+
+    ){
+
+        limparMarcadorSelecionado();
+
+    }
+
+}
+
+/*
+=========================================================
+PESQUISA
+=========================================================
+*/
+
+function selecionarResultadoPesquisa(id){
+
+    selecionarMarcadorPorId(id);
+
+}
+
+/*
+=========================================================
+LIMPAR
+=========================================================
+*/
+
+function limparMarcadores(){
+
+    limparMarcadorSelecionado();
+
+    grupoMarcadores.clearLayers();
+
+    marcadores.length = 0;
+
+}
+
+/*
+=========================================================
+RECARREGAR
+=========================================================
+*/
+
+function recarregarMarcadores(){
+
+    limparMarcadores();
+
+    criarMarcadoresLocais();
+
+    criarMarcadoresComercios();
+
+    atualizarZoomMarcadores();
+
+}
+
+/*
+=========================================================
+EVENTOS
+=========================================================
+*/
+
+if(typeof mapa !== "undefined"){
+
+    document.addEventListener(
+
+        "DOMContentLoaded",
+
+        ()=>{
+
+            if(mapa){
+
+                mapa.on(
+
+                    "zoomend",
+
+                    atualizarZoomMarcadores
+
+                );
+
+            }
+
+        }
+
+    );
+
+}
+/*
+=========================================================
+ANIMAÇÃO
+=========================================================
+*/
+
+function destacarMarcador(marcador){
+
+    const elemento = marcador.getElement();
+
+    if(!elemento){
+
+        return;
+
+    }
+
+    const marker = elemento.querySelector(".marker");
+
+    if(!marker){
+
+        return;
+
+    }
+
+    marker.classList.remove("marker-animando");
+
+    void marker.offsetWidth;
+
+    marker.classList.add("marker-animando");
 
 }
 
@@ -439,83 +708,9 @@ ATUALIZAR MARCADOR
 =========================================================
 */
 
-function atualizarIconeMarcador(marcador){
+function atualizarMarcador(id,dados){
 
-    marcador.setIcon(
-
-        criarDivIcon(marcador.dados)
-
-    );
-
-}
-
-/*
-=========================================================
-DESTACAR
-=========================================================
-*/
-
-function destacarMarcador(id){
-
-    removerDestaques();
-
-    const elemento = document.querySelector(
-
-        `[data-id="${id}"]`
-
-    );
-
-    if(!elemento){
-
-        return;
-
-    }
-
-    elemento.classList.add(
-
-        "marker-selecionado"
-
-    );
-
-}
-
-/*
-=========================================================
-REMOVER DESTAQUES
-=========================================================
-*/
-
-function removerDestaques(){
-
-    document
-
-        .querySelectorAll(".marker")
-
-        .forEach(
-
-            marker=>{
-
-                marker.classList.remove(
-
-                    "marker-selecionado"
-
-                );
-
-            }
-
-        );
-
-}
-
-/*
-=========================================================
-ABRIR LOCAL
-=========================================================
-*/
-
-function selecionarMarcador(id){
-
-    const marcador = getMarcador(id);
+    const marcador = obterMarcador(id);
 
     if(!marcador){
 
@@ -523,59 +718,25 @@ function selecionarMarcador(id){
 
     }
 
-    mapa.flyTo(
+    marcador.dados = {
 
-        marcador.getLatLng(),
+        ...marcador.dados,
 
-        18,
+        ...dados
 
-        {
-
-            animate:true,
-
-            duration:CONFIG.animacao
-
-        }
-
-    );
-
-    destacarMarcador(id);
-
-    abrirPopup(marcador);
+    };
 
 }
 
 /*
 =========================================================
-VISIBILIDADE
+REMOVER MARCADOR
 =========================================================
 */
 
-function mostrarMarcador(id){
+function removerMarcador(id){
 
-    const marcador = getMarcador(id);
-
-    if(!marcador){
-
-        return;
-
-    }
-
-    if(marcador.tipo==="local"){
-
-        camadaLocais.addLayer(marcador);
-
-    }else{
-
-        camadaComercios.addLayer(marcador);
-
-    }
-
-}
-
-function ocultarMarcador(id){
-
-    const marcador = getMarcador(id);
+    const marcador = obterMarcador(id);
 
     if(!marcador){
 
@@ -583,14 +744,94 @@ function ocultarMarcador(id){
 
     }
 
-    if(marcador.tipo==="local"){
+    grupoMarcadores.removeLayer(marcador);
 
-        camadaLocais.removeLayer(marcador);
+    const indice = marcadores.indexOf(marcador);
 
-    }else{
+    if(indice !== -1){
 
-        camadaComercios.removeLayer(marcador);
+        marcadores.splice(indice,1);
+
+    }
+
+    if(marcadorSelecionado === marcador){
+
+        limparMarcadorSelecionado();
 
     }
 
 }
+
+/*
+=========================================================
+ADICIONAR MARCADOR
+=========================================================
+*/
+
+function adicionarMarcador(dados,tipo){
+
+    criarMarcador(
+
+        dados,
+
+        tipo
+
+    );
+
+}
+
+/*
+=========================================================
+CENTRALIZAR E SELECIONAR
+=========================================================
+*/
+
+function abrirMarcador(id){
+
+    const marcador = obterMarcador(id);
+
+    if(!marcador){
+
+        return;
+
+    }
+
+    selecionarMarcador(marcador);
+
+    destacarMarcador(marcador);
+
+}
+
+/*
+=========================================================
+API
+=========================================================
+*/
+
+window.marcadoresAPI={
+
+    obterMarcador,
+
+    abrirMarcador,
+
+    adicionarMarcador,
+
+    removerMarcador,
+
+    atualizarMarcador,
+
+    mostrarTipo,
+
+    esconderTipo,
+
+    mostrarTodosMarcadores,
+
+    esconderTodosMarcadores
+
+};
+
+/*
+=========================================================
+FIM
+=========================================================
+*/
