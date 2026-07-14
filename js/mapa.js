@@ -2,13 +2,39 @@
 =========================================================
 MAPA INTERATIVO DE ANDRELÂNDIA
 mapa.js
-Versão 2.0
+Versão 3.0
 =========================================================
 */
 
 /*
 =========================================================
-MAPA
+LIMITES
+=========================================================
+*/
+
+const LIMITES_MAPA = [
+
+    [
+
+        -21.731000,
+
+        -44.320000
+
+    ],
+
+    [
+
+        -21.751000,
+
+        -44.296000
+
+    ]
+
+];
+
+/*
+=========================================================
+INICIAR MAPA
 =========================================================
 */
 
@@ -46,59 +72,53 @@ function iniciarMapa(){
 
             worldCopyJump:false,
 
-            maxBoundsViscosity:1
+            maxBounds:LIMITES_MAPA,
+
+            maxBoundsViscosity:1,
+
+            zoomAnimation:true,
+
+            fadeAnimation:true,
+
+            markerZoomAnimation:true
 
         }
 
     );
 
-    criarLimites();
-
     criarCamadaSatelite();
 
-    criarSVGs();
+    criarPanes();
 
-    registrarEventos();
+    criarCamadasSVG();
+
+    criarTexturaPergaminho();
+
+    registrarEventosMapa();
+
+    atualizarModoMapa();
 
 }
+
 /*
 =========================================================
-LIMITES
+PANES
 =========================================================
 */
 
-/*
-Ajustaremos essas coordenadas quando
-o SVG definitivo estiver pronto.
-*/
+function criarPanes(){
 
-const LIMITES_MAPA = [
+    mapa.createPane(
 
-    [
-
-        -21.731000,
-
-        -44.320000
-
-    ],
-
-    [
-
-        -21.751000,
-
-        -44.296000
-
-    ]
-
-];
-
-function criarLimites(){
-
-    mapa.setMaxBounds(
-
-        LIMITES_MAPA
+        "paneSVG"
 
     );
+
+    mapa.getPane(
+
+        "paneSVG"
+
+    ).style.zIndex = 350;
 
 }
 
@@ -118,70 +138,66 @@ function criarCamadaSatelite(){
 
             attribution:"© Esri",
 
-            maxZoom:20
+            maxZoom:20,
+
+            maxNativeZoom:19,
+
+            noWrap:true,
+
+            keepBuffer:6,
+
+            updateWhenIdle:true,
+
+            updateWhenZooming:false
 
         }
 
     );
 
-    camadaSatelite.addTo(mapa);
+    camadaSatelite.addTo(
+
+        mapa
+
+    );
 
 }
 /*
 =========================================================
-SVGS
+CAMADAS SVG
 =========================================================
 */
 
-function criarSVGs(){
+function criarCamadasSVG(){
 
-    camadasSVG=[];
+    camadasSVG.length = 0;
 
-    adicionarSVG(
+    adicionarSVG("ruas.svg");
 
-        "ruas.svg"
+    adicionarSVG("rios.svg");
 
-    );
+    adicionarSVG("vegetacao.svg");
 
-    adicionarSVG(
+    adicionarSVG("trilhas.svg");
 
-        "rios.svg"
-
-    );
-
-    adicionarSVG(
-
-        "vegetacao.svg"
-
-    );
-
-    adicionarSVG(
-
-        "trilhas.svg"
-
-    );
-
-    adicionarSVG(
-
-        "desenhos.svg"
-
-    );
+    adicionarSVG("desenhos.svg");
 
 }
 
 function adicionarSVG(nome){
 
-    const camada=L.svgOverlay(
+    const camada = L.svgOverlay(
 
-        CONFIG.caminhos.overlay+nome,
+        CONFIG.caminhos.overlay + nome,
 
         LIMITES_MAPA,
 
         {
 
-            interactive:false,
+            pane:"paneSVG",
 
-            opacity:1
+            opacity:1,
+
+            interactive:false
 
         }
 
@@ -189,9 +205,289 @@ function adicionarSVG(nome){
 
     camada.addTo(mapa);
 
-    camadasSVG.push(
+    camadasSVG.push(camada);
 
-        camada
+}
+
+/*
+=========================================================
+TEXTURA PERGAMINHO
+=========================================================
+*/
+
+function criarTexturaPergaminho(){
+
+    let textura = document.getElementById(
+
+        "texturaPergaminho"
+
+    );
+
+    if(textura){
+
+        return;
+
+    }
+
+    textura = document.createElement(
+
+        "div"
+
+    );
+
+    textura.id = "texturaPergaminho";
+
+    textura.style.position = "absolute";
+
+    textura.style.left = "0";
+
+    textura.style.top = "0";
+
+    textura.style.width = "100%";
+
+    textura.style.height = "100%";
+
+    textura.style.pointerEvents = "none";
+
+    textura.style.zIndex = "340";
+
+    textura.style.opacity = ".38";
+
+    textura.style.backgroundImage =
+        "url('img/interface/papel.webp')";
+
+    textura.style.backgroundRepeat = "repeat";
+
+    textura.style.backgroundSize = "700px";
+
+    mapa.getContainer().appendChild(
+
+        textura
+
+    );
+
+}
+
+/*
+=========================================================
+MODOS
+=========================================================
+*/
+
+function atualizarModoMapa(){
+
+    if(mapaIlustrado){
+
+        ativarModoPergaminho();
+
+    }else{
+
+        ativarModoSatelite();
+
+    }
+
+}
+
+function alternarModoMapa(){
+
+    mapaIlustrado = !mapaIlustrado;
+
+    atualizarModoMapa();
+
+}
+/*
+=========================================================
+MODO PERGAMINHO
+=========================================================
+*/
+
+function ativarModoPergaminho(){
+
+    document.body.classList.add(
+
+        "modo-pergaminho"
+
+    );
+
+    document.body.classList.remove(
+
+        "modo-satelite"
+
+    );
+
+    const textura = document.getElementById(
+
+        "texturaPergaminho"
+
+    );
+
+    if(textura){
+
+        textura.style.display = "block";
+
+    }
+
+    camadasSVG.forEach(
+
+        camada=>{
+
+            if(!mapa.hasLayer(camada)){
+
+                camada.addTo(mapa);
+
+            }
+
+        }
+
+    );
+
+    atualizarBotaoModo();
+
+}
+
+/*
+=========================================================
+MODO SATÉLITE
+=========================================================
+*/
+
+function ativarModoSatelite(){
+
+    document.body.classList.remove(
+
+        "modo-pergaminho"
+
+    );
+
+    document.body.classList.add(
+
+        "modo-satelite"
+
+    );
+
+    const textura = document.getElementById(
+
+        "texturaPergaminho"
+
+    );
+
+    if(textura){
+
+        textura.style.display = "none";
+
+    }
+
+    camadasSVG.forEach(
+
+        camada=>{
+
+            if(mapa.hasLayer(camada)){
+
+                mapa.removeLayer(camada);
+
+            }
+
+        }
+
+    );
+
+    atualizarBotaoModo();
+
+}
+
+/*
+=========================================================
+BOTÃO SATÉLITE
+=========================================================
+*/
+
+function atualizarBotaoModo(){
+
+    const botao = document.getElementById(
+
+        "btnSatellite"
+
+    );
+
+    if(!botao){
+
+        return;
+
+    }
+
+    const imagem = botao.querySelector(
+
+        "img"
+
+    );
+
+    if(!imagem){
+
+        return;
+
+    }
+
+    if(mapaIlustrado){
+
+        imagem.src =
+
+            "img/interface/satelite.svg";
+
+        imagem.alt =
+
+            "Modo Satélite";
+
+    }else{
+
+        imagem.src =
+
+            "img/interface/pergaminho.svg";
+
+        imagem.alt =
+
+            "Modo Pergaminho";
+
+    }
+
+}
+
+/*
+=========================================================
+MOSTRAR / ESCONDER SVGs
+=========================================================
+*/
+
+function mostrarSVGs(){
+
+    camadasSVG.forEach(
+
+        camada=>{
+
+            if(!mapa.hasLayer(camada)){
+
+                camada.addTo(mapa);
+
+            }
+
+        }
+
+    );
+
+}
+
+function esconderSVGs(){
+
+    camadasSVG.forEach(
+
+        camada=>{
+
+            if(mapa.hasLayer(camada)){
+
+                mapa.removeLayer(camada);
+
+            }
+
+        }
 
     );
 
@@ -202,7 +498,7 @@ EVENTOS
 =========================================================
 */
 
-function registrarEventos(){
+function registrarEventosMapa(){
 
     mapa.on(
 
@@ -228,11 +524,33 @@ function registrarEventos(){
 
     );
 
+    mapa.on(
+
+        "load",
+
+        mapaCarregado
+
+    );
+
 }
 
 /*
 =========================================================
-CLICK
+MAPA CARREGADO
+=========================================================
+*/
+
+function mapaCarregado(){
+
+    atualizarZoom();
+
+    atualizarMovimento();
+
+}
+
+/*
+=========================================================
+CLIQUE
 =========================================================
 */
 
@@ -274,32 +592,27 @@ MOVIMENTO
 
 function atualizarMovimento(){
 
-    const centro = mapa.getCenter();
-
-    log(
-
-        "Centro:",
-
-        centro.lat.toFixed(6),
-
-        centro.lng.toFixed(6)
-
-    );
+    /*
+    Reservado para futuras funções
+    como carregamento dinâmico,
+    clusters e otimizações.
+    */
 
 }
+
 /*
 =========================================================
-CENTRALIZAR
+CENTRALIZAR MAPA
 =========================================================
 */
 
 function centralizarMapa(
 
-    lat,
+    latitude,
 
-    lng,
+    longitude,
 
-    zoom=18
+    zoom = 18
 
 ){
 
@@ -307,9 +620,9 @@ function centralizarMapa(
 
         [
 
-            lat,
+            latitude,
 
-            lng
+            longitude
 
         ],
 
@@ -341,7 +654,15 @@ function enquadrarMapa(bounds){
 
         {
 
-            padding:[40,40]
+            padding:[
+
+                40,
+
+                40
+
+            ],
+
+            animate:true
 
         }
 
@@ -375,40 +696,51 @@ window.addEventListener(
 
     atualizarTamanhoMapa
 
-);
-/*
+);/*
 =========================================================
-TEXTURA DO PERGAMINHO
+ATUALIZAR TEXTURA
 =========================================================
 */
 
-function atualizarTextura(){
+function atualizarTexturaPergaminho(){
 
-    const pane = mapa.getPanes().overlayPane;
+    const textura = document.getElementById(
 
-    let textura =
+        "texturaPergaminho"
 
-        document.getElementById(
-
-            "texturaPergaminho"
-
-        );
+    );
 
     if(!textura){
 
-        textura=document.createElement(
+        return;
 
-            "div"
+    }
 
-        );
+    textura.style.display =
 
-        textura.id="texturaPergaminho";
+        mapaIlustrado
 
-        pane.prepend(
+            ? "block"
 
-            textura
+            : "none";
 
-        );
+}
+
+/*
+=========================================================
+RECARREGAR CAMADAS SVG
+=========================================================
+*/
+
+function recarregarSVGs(){
+
+    esconderSVGs();
+
+    criarCamadasSVG();
+
+    if(mapaIlustrado){
+
+        mostrarSVGs();
 
     }
 
@@ -416,30 +748,146 @@ function atualizarTextura(){
 
 /*
 =========================================================
-MODO INICIAL
+ATUALIZAR LIMITES
 =========================================================
 */
 
-document.addEventListener(
+function atualizarLimites(bounds){
 
-    "DOMContentLoaded",
+    mapa.setMaxBounds(
 
-    ()=>{
+        bounds
 
-        setTimeout(
+    );
 
-            ()=>{
+}
 
-                atualizarTextura();
+/*
+=========================================================
+OBTER CENTRO
+=========================================================
+*/
 
-                atualizarModoMapa();
+function obterCentroMapa(){
 
-            },
+    return mapa.getCenter();
 
-            300
+}
 
-        );
+/*
+=========================================================
+OBTER ZOOM
+=========================================================
+*/
 
-    }
+function obterZoomMapa(){
 
-);
+    return mapa.getZoom();
+
+}
+
+/*
+=========================================================
+VERIFICAR CAMADA
+=========================================================
+*/
+
+function possuiCamada(camada){
+
+    return mapa.hasLayer(
+
+        camada
+
+    );
+
+}
+
+/*
+=========================================================
+REMOVER TODAS AS CAMADAS SVG
+=========================================================
+*/
+
+function limparCamadasSVG(){
+
+    camadasSVG.forEach(
+
+        camada=>{
+
+            if(mapa.hasLayer(camada)){
+
+                mapa.removeLayer(
+
+                    camada
+
+                );
+
+            }
+
+        }
+
+    );
+
+    camadasSVG.length = 0;
+
+}
+
+/*
+=========================================================
+ATUALIZAR MODO
+=========================================================
+*/
+
+function definirModoMapa(pergaminho){
+
+    mapaIlustrado = pergaminho;
+
+    atualizarModoMapa();
+
+    atualizarTexturaPergaminho();
+
+}
+
+/*
+=========================================================
+REDESENHAR
+=========================================================
+*/
+
+function redesenharMapa(){
+
+    atualizarTamanhoMapa();
+
+    atualizarModoMapa();
+
+}
+
+/*
+=========================================================
+EXPORTAR (FUTURO)
+=========================================================
+*/
+
+window.mapaAPI = {
+
+    centralizarMapa,
+
+    enquadrarMapa,
+
+    atualizarLimites,
+
+    obterCentroMapa,
+
+    obterZoomMapa,
+
+    definirModoMapa,
+
+    redesenharMapa
+
+};
+
+/*
+=========================================================
+FIM DO ARQUIVO
+=========================================================
+*/
