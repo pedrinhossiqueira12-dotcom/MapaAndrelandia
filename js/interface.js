@@ -99,17 +99,23 @@ BOTÕES
 =========================================================
 */
 
-btnLocate.addEventListener("click",()=>{
+if(btnLocate){
 
-    if(typeof centralizarUsuario==="function"){
+    btnLocate.addEventListener("click",()=>{
 
-        centralizarUsuario();
+        if(typeof centralizarUsuario==="function"){
 
-    }
+            centralizarUsuario();
 
-});
+        }
+
+    });
+
+}
 
 btnLayers.addEventListener("click",()=>{
+
+    fecharPesquisa();
 
     abrirSidebar();
 
