@@ -115,22 +115,7 @@ btnLayers.addEventListener("click",()=>{
 
 });
 
-btnSatellite.addEventListener("click",()=>{
-
-    /*
-    Futuramente aqui teremos:
-
-    Satélite
-
-    Híbrido
-
-    Mapa Claro
-
-    Mapa Escuro
-
-    */
-
-});
+btnSatellite.addEventListener("click",alternarModoMapa);
 
 /*
 =========================================================
