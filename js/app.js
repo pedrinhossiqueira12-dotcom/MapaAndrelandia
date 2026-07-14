@@ -56,11 +56,9 @@ let camadaSatelite = null;
 
 let camadaRuas = null;
 
-let camadaVegetacao = null;
+let camadasSVG = [];
 
-let camadaRios = null;
-
-let camadaDesenhos = null;
+let mapaIlustrado = true;
 
 let marcadorUsuario = null;
 
