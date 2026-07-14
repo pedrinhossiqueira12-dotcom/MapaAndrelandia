@@ -1,9 +1,8 @@
-
 /*
 =========================================================
 MAPA INTERATIVO DE ANDRELÂNDIA
 gps.js
-Versão 1.0
+Versão 1.1
 =========================================================
 */
 
@@ -15,7 +14,9 @@ VARIÁVEIS
 
 let ultimaLocalizacao = null;
 
-let acompanhandoGPS = true;
+let acompanhandoGPS = false;
+
+let watchID = null;
 
 /*
 =========================================================
@@ -33,7 +34,7 @@ function iniciarGPS(){
 
     }
 
-    navigator.geolocation.watchPosition(
+    watchID = navigator.geolocation.watchPosition(
 
         atualizarLocalizacao,
 
@@ -84,6 +85,12 @@ function atualizarLocalizacao(posicao){
         precisao
 
     );
+
+    if(acompanhandoGPS){
+
+        centralizarUsuario();
+
+    }
 
 }
 
@@ -153,7 +160,11 @@ function atualizarMarcadorUsuario(
 
         ]);
 
-        circuloPrecisao.setRadius(precisao);
+        circuloPrecisao.setRadius(
+
+            precisao
+
+        );
 
     }else{
 
@@ -201,6 +212,8 @@ function centralizarUsuario(){
 
     }
 
+    acompanhandoGPS = true;
+
     mapa.flyTo(
 
         ultimaLocalizacao,
@@ -228,6 +241,18 @@ PARAR ACOMPANHAMENTO
 function pararGPS(){
 
     acompanhandoGPS = false;
+
+    if(watchID!==null){
+
+        navigator.geolocation.clearWatch(
+
+            watchID
+
+        );
+
+        watchID = null;
+
+    }
 
 }
 
