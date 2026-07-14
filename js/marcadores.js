@@ -195,29 +195,17 @@ POPUP
 
 function abrirPopup(marcador){
 
-    const item = marcador.dados;
+    destacarMarcador(
 
-    marcador.bindPopup(
-
-        criarPopup(item),
-
-        {
-
-            closeButton:false,
-
-            autoPan:true,
-
-            minWidth:280,
-
-            maxWidth:320,
-
-            className:"popup-andrelandia"
-
-        }
+        marcador.dados.id
 
     );
 
-    marcador.openPopup();
+    abrirSheet(
+
+        marcador.dados
+
+    );
 
 }
 
