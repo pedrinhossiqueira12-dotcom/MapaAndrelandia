@@ -1,187 +1,328 @@
 <!DOCTYPE html>
+
 <html lang="pt-BR">
 
 <head>
 
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
-    <title>Mapa Interativo • Andrelândia MG</title>
+    <meta
+        name="viewport"
+        content="width=device-width,initial-scale=1.0,viewport-fit=cover">
 
-    <meta name="theme-color" content="#111111">
+    <title>Mapa Interativo de Andrelândia</title>
 
-    <link rel="icon" href="img/interface/favicon.png">
+    <meta
+        name="theme-color"
+        content="#5e4426">
 
-    <!-- Leaflet -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <meta
+        name="description"
+        content="Mapa Interativo de Andrelândia">
 
-    <!-- CSS -->
-    <link rel="stylesheet" href="css/style.css">
+    <link
+        rel="icon"
+        href="favicon.ico">
+
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
+    <link
+        rel="stylesheet"
+        href="css/style.css">
 
 </head>
 
-<body>
+<body class="modo-pergaminho">
 
-    <!-- ========================================================= -->
+    <!-- ===================================================== -->
     <!-- MAPA -->
-    <!-- ========================================================= -->
+    <!-- ===================================================== -->
 
     <div id="map"></div>
 
-    <!-- ========================================================= -->
-    <!-- SVG FIXO (HUD) -->
-    <!-- ========================================================= -->
+    <!-- ===================================================== -->
+    <!-- HUD FIXO -->
+    <!-- ===================================================== -->
 
     <div id="hud">
 
         <img
-            id="hud-svg"
+
+            id="hudOverlay"
+
             src="img/interface/hud.svg"
+
             alt="HUD">
 
     </div>
 
-    <!-- ========================================================= -->
-    <!-- PAINEL SUPERIOR -->
-    <!-- ========================================================= -->
+    <!-- ===================================================== -->
+    <!-- PESQUISA -->
+    <!-- ===================================================== -->
 
-    <div id="topbar">
+    <div id="searchContainer">
 
-        <button id="btnMenu" class="map-btn" title="Menu">
+        <button
 
-            ☰
+            id="btnPesquisar"
+
+            class="botao-flutuante"
+
+            aria-label="Pesquisar">
+
+            <img
+
+                src="img/interface/pesquisa.svg"
+
+                alt="Pesquisar">
 
         </button>
 
-        <div id="searchContainer">
-
-            <button id="btnSearch" class="map-btn">
-
-                🔍
-
-            </button>
+        <div id="searchBox">
 
             <input
-                type="text"
+
                 id="searchInput"
+
+                type="text"
+
                 placeholder="Pesquisar...">
 
         </div>
 
     </div>
 
-    <!-- ========================================================= -->
-    <!-- PAINEL DIREITO -->
-    <!-- ========================================================= -->
+    <!-- ===================================================== -->
+    <!-- MENU DIREITO -->
+    <!-- ===================================================== -->
 
-    <div id="rightControls">
+    <div id="menuDireito">
 
-        <button id="btnLocate" class="map-btn" title="Minha localização">
+        <button
 
-            📍
+            id="btnSatellite"
+
+            class="botao-flutuante"
+
+            aria-label="Alternar modo">
+
+            <img
+
+                src="img/interface/satelite.svg"
+
+                alt="Modo">
 
         </button>
 
-        <button id="btnLayers" class="map-btn" title="Camadas">
+        <button
 
-            🎨
+            id="btnGPS"
+
+            class="botao-flutuante"
+
+            aria-label="Minha localização">
+
+            <img
+
+                src="img/interface/gps.svg"
+
+                alt="GPS">
 
         </button>
 
-        <button id="btnSatellite" class="map-btn" title="Satélite">
+        <button
 
-            🛰
+            id="btnMenu"
+
+            class="botao-flutuante"
+
+            aria-label="Menu">
+
+            <img
+
+                src="img/interface/menu.svg"
+
+                alt="Menu">
 
         </button>
 
     </div>
-
-    <!-- ========================================================= -->
+        <!-- ===================================================== -->
     <!-- MENU LATERAL -->
-    <!-- ========================================================= -->
+    <!-- ===================================================== -->
 
-    <aside id="sidebar">
+    <aside id="menuLateral">
 
-        <div class="sidebar-header">
+        <div id="menuCabecalho">
 
-            <h2>Filtros</h2>
+            <h2 id="menuTitulo">
 
-            <button id="btnCloseSidebar">
+                Filtros
 
-                ✕
-
-            </button>
+            </h2>
 
         </div>
 
-        <div id="sidebarContent">
+        <div id="menuConteudo">
 
-            <!-- Preenchido via JavaScript -->
+            <div class="grupoFiltro">
+
+                <h3>
+
+                    Exibir
+
+                </h3>
+
+                <div class="itemFiltro">
+
+                    <span>
+
+                        Pontos Turísticos
+
+                    </span>
+
+                    <label class="switch">
+
+                        <input
+
+                            id="toggleTurismo"
+
+                            type="checkbox"
+
+                            checked>
+
+                        <span class="slider"></span>
+
+                    </label>
+
+                </div>
+
+                <div class="itemFiltro">
+
+                    <span>
+
+                        Comércios
+
+                    </span>
+
+                    <label class="switch">
+
+                        <input
+
+                            id="toggleComercios"
+
+                            type="checkbox"
+
+                            checked>
+
+                        <span class="slider"></span>
+
+                    </label>
+
+                </div>
+
+            </div>
+
+            <div
+
+                id="categoriasContainer"
+
+                class="grupoFiltro">
+
+                <h3>
+
+                    Categorias
+
+                </h3>
+
+            </div>
 
         </div>
+
+        <button id="fecharMenu">
+
+            Fechar
+
+        </button>
 
     </aside>
 
-    <!-- ========================================================= -->
-    <!-- OVERLAY -->
-    <!-- ========================================================= -->
+    <!-- ===================================================== -->
+    <!-- PAINEL INFERIOR -->
+    <!-- ===================================================== -->
 
-    <div id="overlay"></div>
-<!-- ========================================================= -->
-<!-- PAINEL INFERIOR -->
-<!-- ========================================================= -->
+    <section id="bottomSheet">
 
-<section id="bottomSheet">
+        <div id="sheetHandle"></div>
 
-    <div id="sheetHandle"></div>
+        <div id="sheetImagem">
 
-    <div id="sheetImagem">
+            <img
 
-        <img
-            id="sheetFoto"
-            src="img/interface/sem-foto.webp"
-            alt="Foto">
+                id="sheetFoto"
 
-    </div>
+                src="img/interface/sem-foto.webp"
 
-    <div id="sheetConteudo">
-
-        <span id="sheetCategoria"></span>
-
-        <h2 id="sheetTitulo"></h2>
-
-        <p id="sheetDescricao"></p>
-
-        <div id="sheetBotoes">
-
-            <button id="btnDetalhes">
-
-                Ver detalhes
-
-            </button>
-
-            <button id="btnRota">
-
-                Como chegar
-
-            </button>
+                alt="Foto">
 
         </div>
 
-    </div>
+        <div id="sheetConteudo">
 
-</section>
-    <!-- ========================================================= -->
-    <!-- LEAFLET -->
-    <!-- ========================================================= -->
+            <span id="sheetCategoria"></span>
 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+            <h2 id="sheetTitulo"></h2>
 
-    <!-- ========================================================= -->
+            <p id="sheetDescricao"></p>
+
+            <div id="sheetBotoes">
+
+                <button id="btnDetalhes">
+
+                    Ver detalhes
+
+                </button>
+
+                <button id="btnRota">
+
+                    Como chegar
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </section>
+        <!-- ===================================================== -->
+    <!-- SCRIPTS EXTERNOS -->
+    <!-- ===================================================== -->
+
+    <script
+        src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+    </script>
+
+    <!-- ===================================================== -->
+    <!-- DADOS -->
+    <!-- ===================================================== -->
+
+    <script src="data/locais.js"></script>
+
+    <script src="data/comercios.js"></script>
+
+    <!-- ===================================================== -->
+    <!-- CONFIGURAÇÃO -->
+    <!-- ===================================================== -->
+
+    <script src="js/config.js"></script>
+
+    <script src="js/util.js"></script>
+
+    <!-- ===================================================== -->
     <!-- MÓDULOS -->
-    <!-- ========================================================= -->
-
-    <script src="js/app.js"></script>
+    <!-- ===================================================== -->
 
     <script src="js/mapa.js"></script>
 
@@ -197,7 +338,22 @@
 
     <script src="js/camadas.js"></script>
 
-    <script src="js/interface.js"></script>
+    <script src="js/app.js"></script>
+        <script>
+
+        document.addEventListener(
+
+            "DOMContentLoaded",
+
+            ()=>{
+
+                iniciarAplicacao();
+
+            }
+
+        );
+
+    </script>
 
 </body>
 
