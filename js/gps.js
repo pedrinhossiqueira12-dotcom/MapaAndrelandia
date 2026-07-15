@@ -2,7 +2,7 @@
 =========================================================
 MAPA INTERATIVO DE ANDRELÂNDIA
 gps.js
-Versão 1.1
+Versão 2.0
 =========================================================
 */
 
@@ -29,6 +29,12 @@ function iniciarGPS(){
     if(!navigator.geolocation){
 
         console.warn("Geolocalização não suportada.");
+
+        return;
+
+    }
+
+    if(watchID !== null){
 
         return;
 
@@ -88,7 +94,21 @@ function atualizarLocalizacao(posicao){
 
     if(acompanhandoGPS){
 
-        centralizarUsuario();
+        mapa.flyTo(
+
+            ultimaLocalizacao,
+
+            mapa.getZoom(),
+
+            {
+
+                animate:true,
+
+                duration:CONFIG.animacao
+
+            }
+
+        );
 
     }
 
@@ -110,27 +130,19 @@ function atualizarMarcadorUsuario(
 
 ){
 
-    if(marcadorUsuario){
+    const posicao = [
 
-        marcadorUsuario.setLatLng([
+        latitude,
 
-            latitude,
+        longitude
 
-            longitude
+    ];
 
-        ]);
-
-    }else{
+    if(!marcadorUsuario){
 
         marcadorUsuario = L.circleMarker(
 
-            [
-
-                latitude,
-
-                longitude
-
-            ],
+            posicao,
 
             {
 
@@ -148,35 +160,21 @@ function atualizarMarcadorUsuario(
 
         ).addTo(mapa);
 
-    }
+    }else{
 
-    if(circuloPrecisao){
+        marcadorUsuario.setLatLng(
 
-        circuloPrecisao.setLatLng([
-
-            latitude,
-
-            longitude
-
-        ]);
-
-        circuloPrecisao.setRadius(
-
-            precisao
+            posicao
 
         );
 
-    }else{
+    }
+
+    if(!circuloPrecisao){
 
         circuloPrecisao = L.circle(
 
-            [
-
-                latitude,
-
-                longitude
-
-            ],
+            posicao,
 
             {
 
@@ -193,6 +191,20 @@ function atualizarMarcadorUsuario(
             }
 
         ).addTo(mapa);
+
+    }else{
+
+        circuloPrecisao.setLatLng(
+
+            posicao
+
+        );
+
+        circuloPrecisao.setRadius(
+
+            precisao
+
+        );
 
     }
 
@@ -218,7 +230,13 @@ function centralizarUsuario(){
 
         ultimaLocalizacao,
 
-        18,
+        Math.max(
+
+            mapa.getZoom(),
+
+            18
+
+        ),
 
         {
 
@@ -238,11 +256,23 @@ PARAR ACOMPANHAMENTO
 =========================================================
 */
 
-function pararGPS(){
+function pararAcompanhamentoGPS(){
 
     acompanhandoGPS = false;
 
-    if(watchID!==null){
+}
+
+/*
+=========================================================
+FINALIZAR GPS
+=========================================================
+*/
+
+function desligarGPS(){
+
+    acompanhandoGPS = false;
+
+    if(watchID !== null){
 
         navigator.geolocation.clearWatch(
 
@@ -266,10 +296,28 @@ function erroLocalizacao(erro){
 
     console.warn(
 
-        "Erro GPS:",
+        "Erro ao obter localização:",
 
         erro.message
 
     );
+
+}
+
+/*
+=========================================================
+UTILITÁRIOS
+=========================================================
+*/
+
+function gpsAtivo(){
+
+    return watchID !== null;
+
+}
+
+function possuiLocalizacao(){
+
+    return ultimaLocalizacao !== null;
 
 }
