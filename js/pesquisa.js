@@ -2,7 +2,7 @@
 =========================================================
 MAPA INTERATIVO DE ANDRELÂNDIA
 pesquisa.js
-Versão 1.0
+Versão 2.0
 =========================================================
 */
 
@@ -16,8 +16,6 @@ let indicePesquisa = [];
 
 let resultadosPesquisa = [];
 
-let resultadoSelecionado = -1;
-
 /*
 =========================================================
 INICIAR
@@ -28,7 +26,25 @@ function iniciarPesquisa(){
 
     criarIndicePesquisa();
 
-    configurarPesquisa();
+    if(searchInput){
+
+        searchInput.addEventListener(
+
+            "input",
+
+            pesquisar
+
+        );
+
+        searchInput.addEventListener(
+
+            "keydown",
+
+            teclaPesquisa
+
+        );
+
+    }
 
 }
 
@@ -40,41 +56,25 @@ CRIAR ÍNDICE
 
 function criarIndicePesquisa(){
 
-    indicePesquisa = [];
+    indicePesquisa = [
 
-    locais.forEach(item=>{
+        ...locais,
 
-        indicePesquisa.push(item);
+        ...comercios
 
-    });
-
-    comercios.forEach(item=>{
-
-        indicePesquisa.push(item);
-
-    });
-
-    console.log(
-
-        "Índice criado:",
-
-        indicePesquisa.length,
-
-        "registros"
-
-    );
+    ];
 
 }
 
 /*
 =========================================================
-NORMALIZAR TEXTO
+NORMALIZAR
 =========================================================
 */
 
 function normalizarTexto(texto){
 
-    return texto
+    return String(texto || "")
 
         .toLowerCase()
 
@@ -85,19 +85,6 @@ function normalizarTexto(texto){
         .trim();
 
 }
-/*
-=========================================================
-DIGITAÇÃO
-=========================================================
-*/
-
-searchInput.addEventListener(
-
-    "input",
-
-    pesquisar
-
-);
 
 /*
 =========================================================
@@ -107,13 +94,19 @@ PESQUISAR
 
 function pesquisar(){
 
+    if(!searchInput){
+
+        return;
+
+    }
+
     const texto = normalizarTexto(
 
         searchInput.value
 
     );
 
-    if(texto.length===0){
+    if(!texto){
 
         limparResultados();
 
@@ -123,19 +116,143 @@ function pesquisar(){
 
     resultadosPesquisa = indicePesquisa.filter(
 
+        item =>
+
+            normalizarTexto(item.nome)
+
+            .includes(texto)
+
+    );
+
+    mostrarResultados();
+
+}
+
+/*
+=========================================================
+RESULTADOS
+=========================================================
+*/
+
+function mostrarResultados(){
+
+    removerListaResultados();
+
+    if(
+
+        resultadosPesquisa.length===0 ||
+
+        !searchContainer
+
+    ){
+
+        return;
+
+    }
+
+    const lista = document.createElement("div");
+
+    lista.id = "listaResultados";
+
+    resultadosPesquisa.forEach(
+
         item=>{
 
-            return normalizarTexto(
+            const botao = document.createElement("button");
 
-                item.nome
+            botao.className = "resultadoPesquisa";
 
-            ).includes(texto);
+            botao.innerHTML = `
+
+                <div class="resultadoIcone">
+
+                    <img
+                        src="${CONFIG.caminhos.icones}${item.icone}"
+                        alt="">
+
+                </div>
+
+                <div class="resultadoTexto">
+
+                    <strong>${item.nome}</strong>
+
+                    <span>${item.categoria}</span>
+
+                </div>
+
+            `;
+
+            botao.addEventListener(
+
+                "click",
+
+                ()=>{
+
+                    selecionarResultado(item);
+
+                }
+
+            );
+
+            lista.appendChild(botao);
 
         }
 
     );
 
-    mostrarResultados();
+    searchContainer.appendChild(lista);
+
+}
+
+/*
+=========================================================
+SELECIONAR
+=========================================================
+*/
+
+function selecionarResultado(item){
+
+    fecharPesquisa();
+
+    limparResultados();
+
+    if(
+
+        typeof abrirMarcador==="function"
+
+    ){
+
+        abrirMarcador(item.id);
+
+    }
+
+}
+
+/*
+=========================================================
+ENTER
+=========================================================
+*/
+
+function teclaPesquisa(e){
+
+    if(
+
+        e.key==="Enter" &&
+
+        resultadosPesquisa.length
+
+    ){
+
+        e.preventDefault();
+
+        selecionarResultado(
+
+            resultadosPesquisa[0]
+
+        );
+
+    }
 
 }
 
@@ -147,84 +264,11 @@ LIMPAR
 
 function limparResultados(){
 
-    resultadosPesquisa=[];
-
-    resultadoSelecionado=-1;
+    resultadosPesquisa = [];
 
     removerListaResultados();
 
 }
-/*
-=========================================================
-MOSTRAR RESULTADOS
-=========================================================
-*/
-
-function mostrarResultados(){
-
-    removerListaResultados();
-
-    if(resultadosPesquisa.length===0){
-
-        return;
-
-    }
-
-    const lista = document.createElement("div");
-
-    lista.id = "listaResultados";
-
-    searchContainer.appendChild(lista);
-
-    resultadosPesquisa.forEach((item,index)=>{
-
-        const resultado = document.createElement("button");
-
-        resultado.className = "resultadoPesquisa";
-
-        resultado.innerHTML = `
-
-            <div class="resultadoIcone">
-
-                <img
-                    src="${CONFIG.caminhos.icones}${item.icone}"
-                    alt="">
-
-            </div>
-
-            <div class="resultadoTexto">
-
-                <strong>${item.nome}</strong>
-
-                <span>${item.categoria}</span>
-
-            </div>
-
-        `;
-
-        resultado.addEventListener(
-
-            "click",
-
-            ()=>{
-
-                selecionarResultado(index);
-
-            }
-
-        );
-
-        lista.appendChild(resultado);
-
-    });
-
-}
-
-/*
-=========================================================
-REMOVER RESULTADOS
-=========================================================
-*/
 
 function removerListaResultados(){
 
@@ -241,73 +285,10 @@ function removerListaResultados(){
     }
 
 }
-/*
-=========================================================
-SELECIONAR RESULTADO
-=========================================================
-*/
-
-function selecionarResultado(indice){
-
-    const item = resultadosPesquisa[indice];
-
-    if(!item){
-
-        return;
-
-    }
-
-    fecharPesquisa();
-
-    localizarMarcador(item.id);
-
-}
 
 /*
 =========================================================
-ENTER
-=========================================================
-*/
-
-searchInput.addEventListener(
-
-    "keydown",
-
-    e=>{
-
-        if(e.key==="Enter"){
-
-            e.preventDefault();
-
-            if(resultadosPesquisa.length){
-
-                selecionarResultado(0);
-
-            }
-
-        }
-
-    }
-
-);
-
-/*
-=========================================================
-LIMPAR PESQUISA
-=========================================================
-*/
-
-function limparPesquisa(){
-
-    searchInput.value = "";
-
-    limparResultados();
-
-}
-
-/*
-=========================================================
-ATUALIZAR ÍNDICE
+ATUALIZAR
 =========================================================
 */
 
