@@ -2,7 +2,7 @@
 =========================================================
 MAPA INTERATIVO DE ANDRELÂNDIA
 filtros.js
-Versão 1.0
+Versão 2.0
 =========================================================
 */
 
@@ -32,6 +32,8 @@ function iniciarFiltros(){
 
     criarCategorias();
 
+    configurarFiltros();
+
     aplicarFiltros();
 
 }
@@ -46,35 +48,88 @@ function criarCategorias(){
 
     filtros.categorias.clear();
 
-    locais.forEach(item=>{
+    [...locais,...comercios].forEach(
 
-        if(item.categoria){
+        item=>{
 
-            filtros.categorias.add(
+            if(item.categoria){
 
-                item.categoria
+                filtros.categorias.add(
 
-            );
+                    item.categoria
 
-        }
+                );
 
-    });
-
-    comercios.forEach(item=>{
-
-        if(item.categoria){
-
-            filtros.categorias.add(
-
-                item.categoria
-
-            );
+            }
 
         }
 
-    });
+    );
 
 }
+
+/*
+=========================================================
+CONFIGURAR
+=========================================================
+*/
+
+function configurarFiltros(){
+
+    const turismo = document.getElementById(
+
+        "toggleTurismo"
+
+    );
+
+    const comercios = document.getElementById(
+
+        "toggleComercios"
+
+    );
+
+    if(turismo){
+
+        turismo.checked = filtros.turismo;
+
+        turismo.addEventListener(
+
+            "change",
+
+            ()=>{
+
+                filtros.turismo = turismo.checked;
+
+                aplicarFiltros();
+
+            }
+
+        );
+
+    }
+
+    if(comercios){
+
+        comercios.checked = filtros.comercios;
+
+        comercios.addEventListener(
+
+            "change",
+
+            ()=>{
+
+                filtros.comercios = comercios.checked;
+
+                aplicarFiltros();
+
+            }
+
+        );
+
+    }
+
+}
+
 /*
 =========================================================
 APLICAR
@@ -83,55 +138,146 @@ APLICAR
 
 function aplicarFiltros(){
 
-    camadaLocais.clearLayers();
+    if(!grupoMarcadores){
 
-    camadaComercios.clearLayers();
+        return;
 
-    marcadores.forEach(marcador=>{
+    }
 
-        const item = marcador.dados;
+    marcadores.forEach(
 
-        if(item.visivel===false){
+        marcador=>{
 
-            return;
+            let visivel = true;
+
+            if(
+
+                marcador.tipo==="local" &&
+
+                !filtros.turismo
+
+            ){
+
+                visivel = false;
+
+            }
+
+            if(
+
+                marcador.tipo==="comercio" &&
+
+                !filtros.comercios
+
+            ){
+
+                visivel = false;
+
+            }
+
+            if(
+
+                filtros.categorias.size>0 &&
+
+                !filtros.categorias.has(
+
+                    marcador.dados.categoria
+
+                )
+
+            ){
+
+                visivel = false;
+
+            }
+
+            if(visivel){
+
+                if(
+
+                    !grupoMarcadores.hasLayer(
+
+                        marcador
+
+                    )
+
+                ){
+
+                    grupoMarcadores.addLayer(
+
+                        marcador
+
+                    );
+
+                }
+
+            }else{
+
+                if(
+
+                    grupoMarcadores.hasLayer(
+
+                        marcador
+
+                    )
+
+                ){
+
+                    grupoMarcadores.removeLayer(
+
+                        marcador
+
+                    );
+
+                }
+
+            }
 
         }
 
-        if(
+    );
 
-            marcador.tipo==="local" &&
-
-            filtros.turismo
-
-        ){
-
-            camadaLocais.addLayer(
-
-                marcador
-
-            );
-
-        }
-
-        if(
-
-            marcador.tipo==="comercio" &&
-
-            filtros.comercios
-
-        ){
-
-            camadaComercios.addLayer(
-
-                marcador
-
-            );
-
-        }
-
-    });
+    atualizarMarcadorSelecionado();
 
 }
+
+/*
+=========================================================
+CATEGORIAS
+=========================================================
+*/
+
+function ativarCategoria(categoria){
+
+    filtros.categorias.add(
+
+        categoria
+
+    );
+
+    aplicarFiltros();
+
+}
+
+function desativarCategoria(categoria){
+
+    filtros.categorias.delete(
+
+        categoria
+
+    );
+
+    aplicarFiltros();
+
+}
+
+function limparCategorias(){
+
+    filtros.categorias.clear();
+
+    aplicarFiltros();
+
+}
+
 /*
 =========================================================
 ATALHOS
@@ -146,7 +292,7 @@ function mostrarTurismo(){
 
 }
 
-function ocultarTurismo(){
+function esconderTurismo(){
 
     filtros.turismo = false;
 
@@ -162,11 +308,21 @@ function mostrarComercios(){
 
 }
 
-function ocultarComercios(){
+function esconderComercios(){
 
     filtros.comercios = false;
 
     aplicarFiltros();
+
+}
+
+function mostrarTudo(){
+
+    filtros.turismo = true;
+
+    filtros.comercios = true;
+
+    limparCategorias();
 
 }
 
