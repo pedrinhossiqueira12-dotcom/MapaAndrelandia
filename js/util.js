@@ -66,7 +66,13 @@ NÚMERO
 
 function numero(valor){
 
-    return Number(valor);
+    const n = Number(valor);
+
+    return Number.isFinite(n)
+
+        ? n
+
+        : 0;
 
 }
 /*
@@ -93,19 +99,29 @@ CAPITALIZAR
 
 function capitalizar(texto){
 
+    texto = String(texto || "").trim();
+
     if(!texto){
 
         return "";
 
     }
 
-    return texto.replace(
+    return texto
 
-        /\b\w/g,
+        .split(" ")
 
-        letra=>letra.toUpperCase()
+        .map(
 
-    );
+            palavra=>
+
+                palavra.charAt(0).toUpperCase() +
+
+                palavra.slice(1)
+
+        )
+
+        .join(" ");
 
 }
 
@@ -127,23 +143,17 @@ function distancia(
 
 ){
 
+    if(!mapa){
+
+        return 0;
+
+    }
+
     return mapa.distance(
 
-        [
+        [lat1,lng1],
 
-            lat1,
-
-            lng1
-
-        ],
-
-        [
-
-            lat2,
-
-            lng2
-
-        ]
+        [lat2,lng2]
 
     );
 
@@ -200,7 +210,15 @@ LOG
 =========================================================
 */
 
+const DEBUG = false;
+
 function log(){
+
+    if(!DEBUG){
+
+        return;
+
+    }
 
     console.log(
 
