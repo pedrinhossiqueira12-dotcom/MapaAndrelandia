@@ -2,7 +2,7 @@
 =========================================================
 MAPA INTERATIVO DE ANDRELÂNDIA
 popup.js
-Versão 1.0
+Versão 2.0
 =========================================================
 */
 
@@ -34,6 +34,12 @@ VARIÁVEIS
 
 let itemSelecionado = null;
 
+let sheetAberto = false;
+
+let inicioY = 0;
+
+let fimY = 0;
+
 /*
 =========================================================
 ABRIR
@@ -42,9 +48,17 @@ ABRIR
 
 function abrirSheet(item){
 
+    if(!bottomSheet){
+
+        return;
+
+    }
+
     itemSelecionado = item;
 
     preencherSheet(item);
+
+    sheetAberto = true;
 
     bottomSheet.classList.add("open");
 
@@ -58,9 +72,23 @@ FECHAR
 
 function fecharSheet(){
 
+    if(!bottomSheet){
+
+        return;
+
+    }
+
+    sheetAberto = false;
+
     bottomSheet.classList.remove("open");
 
-    removerDestaques();
+    itemSelecionado = null;
+
+    if(typeof removerDestaques==="function"){
+
+        removerDestaques();
+
+    }
 
 }
 
@@ -72,102 +100,47 @@ PREENCHER
 
 function preencherSheet(item){
 
-    sheetFoto.src =
-        item.foto ||
-        "img/interface/sem-foto.webp";
+    if(!item){
 
-    sheetTitulo.textContent =
-        item.nome || "";
+        return;
 
-    sheetCategoria.textContent =
-        item.categoria || "";
+    }
 
-    sheetDescricao.textContent =
-        item.descricaoCurta || "";
+    sheetFoto.src = item.foto || "img/interface/sem-foto.webp";
+
+    sheetTitulo.textContent = item.nome || "";
+
+    sheetCategoria.textContent = item.categoria || "";
+
+    sheetDescricao.textContent = item.descricaoCurta || "";
 
 }
-/*
-=========================================================
-BOTÃO DETALHES
-=========================================================
-*/
-
-btnDetalhes.addEventListener("click",()=>{
-
-    if(!itemSelecionado){
-
-        return;
-
-    }
-
-    if(itemSelecionado.pagina){
-
-        window.location.href = itemSelecionado.pagina;
-
-    }
-
-});
 
 /*
 =========================================================
-BOTÃO ROTA
+DETALHES
 =========================================================
 */
 
-btnRota.addEventListener("click",()=>{
+if(btnDetalhes){
 
-    if(!itemSelecionado){
-
-        return;
-
-    }
-
-    if(
-        itemSelecionado.latitude===undefined ||
-        itemSelecionado.longitude===undefined
-    ){
-
-        return;
-
-    }
-
-    const url =
-
-    "https://www.google.com/maps/dir/?api=1" +
-
-    "&destination=" +
-
-    itemSelecionado.latitude +
-
-    "," +
-
-    itemSelecionado.longitude;
-
-    window.open(
-
-        url,
-
-        "_blank"
-
-    );
-
-});
-
-/*
-=========================================================
-CLIQUE NO MAPA
-=========================================================
-*/
-
-function ativarFechamentoMapa(){
-
-    mapa.on(
+    btnDetalhes.addEventListener(
 
         "click",
 
         ()=>{
 
-            fecharSheet();
+            if(
+
+                itemSelecionado &&
+
+                itemSelecionado.pagina
+
+            ){
+
+                window.location.href = itemSelecionado.pagina;
+
+            }
 
         }
 
@@ -177,57 +150,173 @@ function ativarFechamentoMapa(){
 
 /*
 =========================================================
-GESTOS
+ROTA
 =========================================================
 */
 
-let inicioY = 0;
+if(btnRota){
 
-let fimY = 0;
+    btnRota.addEventListener(
 
-bottomSheet.addEventListener(
+        "click",
 
-    "touchstart",
+        ()=>{
 
-    e=>{
+            if(
 
-        inicioY =
+                !itemSelecionado ||
 
-            e.touches[0].clientY;
+                itemSelecionado.latitude===undefined ||
+
+                itemSelecionado.longitude===undefined
+
+            ){
+
+                return;
+
+            }
+
+            window.open(
+
+                "https://www.google.com/maps/dir/?api=1&destination=" +
+
+                itemSelecionado.latitude +
+
+                "," +
+
+                itemSelecionado.longitude,
+
+                "_blank"
+
+            );
+
+        }
+
+    );
+
+}
+
+/*
+=========================================================
+GESTO
+=========================================================
+*/
+
+if(bottomSheet){
+
+    bottomSheet.addEventListener(
+
+        "touchstart",
+
+        e=>{
+
+            inicioY = e.touches[0].clientY;
+
+        }
+
+    );
+
+    bottomSheet.addEventListener(
+
+        "touchmove",
+
+        e=>{
+
+            fimY = e.touches[0].clientY;
+
+        }
+
+    );
+
+    bottomSheet.addEventListener(
+
+        "touchend",
+
+        ()=>{
+
+            if(fimY - inicioY > 80){
+
+                fecharSheet();
+
+            }
+
+        }
+
+    );
+
+}
+
+/*
+=========================================================
+MAPA
+=========================================================
+*/
+
+function ativarFechamentoMapa(){
+
+    if(!mapa){
+
+        return;
 
     }
 
-);
+    mapa.on(
 
-bottomSheet.addEventListener(
+        "click",
 
-    "touchmove",
+        fecharSheet
+
+    );
+
+}
+
+/*
+=========================================================
+UTILITÁRIO
+=========================================================
+*/
+
+function sheetEstaAberto(){
+
+    return sheetAberto;
+
+}
+
+/*
+=========================================================
+ERRO DA FOTO
+=========================================================
+*/
+
+if(sheetFoto){
+
+    sheetFoto.addEventListener(
+
+        "error",
+
+        ()=>{
+
+            sheetFoto.src = "img/interface/sem-foto.webp";
+
+        }
+
+    );
+
+}
+
+/*
+=========================================================
+TECLADO
+=========================================================
+*/
+
+document.addEventListener(
+
+    "keydown",
 
     e=>{
 
-        fimY =
-
-            e.touches[0].clientY;
-
-    }
-
-);
-
-bottomSheet.addEventListener(
-
-    "touchend",
-
-    ()=>{
-
-        const distancia =
-
-            fimY - inicioY;
-
-        if(
-
-            distancia>80
-
-        ){
+        if(e.key==="Escape"){
 
             fecharSheet();
 
@@ -249,113 +338,14 @@ document.addEventListener(
 
     ()=>{
 
-        if(typeof mapa!=="undefined"){
+        setTimeout(
 
-            setTimeout(
+            ativarFechamentoMapa,
 
-                ativarFechamentoMapa,
+            300
 
-                500
-
-            );
-
-        }
+        );
 
     }
 
 );
-/*
-=========================================================
-ANIMAÇÕES
-=========================================================
-*/
-
-let sheetAberto = false;
-
-function mostrarSheet(){
-
-    sheetAberto = true;
-
-    bottomSheet.classList.add("open");
-
-}
-
-function esconderSheet(){
-
-    sheetAberto = false;
-
-    bottomSheet.classList.remove("open");
-
-}
-
-/*
-=========================================================
-ABRIR
-=========================================================
-*/
-
-function abrirSheet(item){
-
-    itemSelecionado = item;
-
-    preencherSheet(item);
-
-    mostrarSheet();
-
-}
-
-/*
-=========================================================
-FECHAR
-=========================================================
-*/
-
-function fecharSheet(){
-
-    esconderSheet();
-
-    removerDestaques();
-
-    itemSelecionado = null;
-
-}
-
-/*
-=========================================================
-ATUALIZAR FOTO
-=========================================================
-*/
-
-sheetFoto.addEventListener("error",()=>{
-
-    sheetFoto.src="img/interface/sem-foto.webp";
-
-});
-
-/*
-=========================================================
-ESC
-=========================================================
-*/
-
-document.addEventListener("keydown",(e)=>{
-
-    if(e.key==="Escape"){
-
-        fecharSheet();
-
-    }
-
-});
-
-/*
-=========================================================
-ESTADO
-=========================================================
-*/
-
-function sheetEstaAberto(){
-
-    return sheetAberto;
-
-}
