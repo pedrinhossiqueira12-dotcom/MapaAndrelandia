@@ -2,7 +2,7 @@
 =========================================================
 MAPA INTERATIVO DE ANDRELÂNDIA
 app.js
-Versão 1.0
+Versão 2.0
 =========================================================
 */
 
@@ -14,31 +14,31 @@ CONFIGURAÇÕES
 
 const CONFIG = {
 
-    cidade: "Andrelândia",
+    cidade:"Andrelândia",
 
-    estado: "MG",
+    estado:"MG",
 
-    centro: [-21.74135, -44.30920],
+    centro:[-21.74135,-44.30920],
 
-    zoomInicial: 16,
+    zoomInicial:16,
 
-    zoomMinimo: 14,
+    zoomMinimo:14,
 
-    zoomMaximo: 20,
+    zoomMaximo:20,
 
-    animacao: 0.6,
+    animacao:0.6,
 
-    caminhos: {
+    caminhos:{
 
-        locais: "data/locais.json",
+        locais:"data/locais.json",
 
-        comercios: "data/comercios.json",
+        comercios:"data/comercios.json",
 
-        hud: "img/interface/hud.svg",
+        hud:"img/interface/hud.svg",
 
-        overlay: "img/overlay/",
+        overlay:"img/overlay/",
 
-        icones: "img/icones/"
+        icones:"img/icones/"
 
     }
 
@@ -46,7 +46,7 @@ const CONFIG = {
 
 /*
 =========================================================
-VARIÁVEIS GLOBAIS
+VARIÁVEIS
 =========================================================
 */
 
@@ -80,25 +80,25 @@ ELEMENTOS
 =========================================================
 */
 
-const btnMenu = document.getElementById("btnMenu");
+let btnMenu;
 
-const btnSearch = document.getElementById("btnSearch");
+let btnSearch;
 
-const btnLocate = document.getElementById("btnLocate");
+let btnLocate;
 
-const btnLayers = document.getElementById("btnLayers");
+let btnLayers;
 
-const btnSatellite = document.getElementById("btnSatellite");
+let btnSatellite;
 
-const btnCloseSidebar = document.getElementById("btnCloseSidebar");
+let btnCloseSidebar;
 
-const sidebar = document.getElementById("sidebar");
+let sidebar;
 
-const overlay = document.getElementById("overlay");
+let overlay;
 
-const searchContainer = document.getElementById("searchContainer");
+let searchContainer;
 
-const searchInput = document.getElementById("searchInput");
+let searchInput;
 
 /*
 =========================================================
@@ -106,7 +106,13 @@ INICIALIZAÇÃO
 =========================================================
 */
 
-document.addEventListener("DOMContentLoaded", iniciarSistema);
+document.addEventListener(
+
+    "DOMContentLoaded",
+
+    iniciarSistema
+
+);
 
 /*
 =========================================================
@@ -116,54 +122,81 @@ INICIAR
 
 async function iniciarSistema(){
 
-    console.log("========================================");
-    console.log("MAPA INTERATIVO DE ANDRELÂNDIA");
-    console.log("Versão 1.0");
-    console.log("========================================");
+    obterElementos();
 
     await carregarDados();
 
-    if(typeof iniciarMapa === "function"){
+    if(typeof iniciarMapa==="function"){
 
         iniciarMapa();
 
     }
 
-    if(typeof iniciarInterface === "function"){
+    if(typeof iniciarInterface==="function"){
 
         iniciarInterface();
 
     }
 
-    if(typeof iniciarPesquisa === "function"){
+    if(typeof iniciarPesquisa==="function"){
 
         iniciarPesquisa();
 
     }
 
-    if(typeof iniciarFiltros === "function"){
+    if(typeof iniciarFiltros==="function"){
 
         iniciarFiltros();
 
     }
 
-    if(typeof iniciarCamadas === "function"){
+    if(typeof iniciarCamadas==="function"){
 
         iniciarCamadas();
 
     }
 
-    if(typeof iniciarGPS === "function"){
+    if(typeof iniciarGPS==="function"){
 
         iniciarGPS();
 
     }
 
-    if(typeof iniciarMarcadores === "function"){
+    if(typeof iniciarMarcadores==="function"){
 
         iniciarMarcadores();
 
     }
+
+}
+
+/*
+=========================================================
+ELEMENTOS
+=========================================================
+*/
+
+function obterElementos(){
+
+    btnMenu = document.getElementById("btnMenu");
+
+    btnSearch = document.getElementById("btnPesquisar");
+
+    btnLocate = document.getElementById("btnGPS");
+
+    btnLayers = document.getElementById("menuDireito");
+
+    btnSatellite = document.getElementById("btnSatellite");
+
+    btnCloseSidebar = document.getElementById("fecharMenu");
+
+    sidebar = document.getElementById("menuLateral");
+
+    overlay = document.getElementById("overlay");
+
+    searchContainer = document.getElementById("searchContainer");
+
+    searchInput = document.getElementById("searchInput");
 
 }
 
@@ -177,106 +210,152 @@ async function carregarDados(){
 
     try{
 
-        const respostaLocais =
-            await fetch(CONFIG.caminhos.locais);
+        const resposta = await fetch(CONFIG.caminhos.locais);
 
-        if(respostaLocais.ok){
+        if(resposta.ok){
 
-            locais = await respostaLocais.json();
+            locais = await resposta.json();
 
         }
 
-    }catch(erro){
+    }catch(e){
 
-        console.warn("locais.json não encontrado.");
+        console.warn("Erro ao carregar locais.json");
 
     }
 
     try{
 
-        const respostaComercios =
-            await fetch(CONFIG.caminhos.comercios);
+        const resposta = await fetch(CONFIG.caminhos.comercios);
 
-        if(respostaComercios.ok){
+        if(resposta.ok){
 
-            comercios = await respostaComercios.json();
+            comercios = await resposta.json();
 
         }
 
-    }catch(erro){
+    }catch(e){
 
-        console.warn("comercios.json não encontrado.");
+        console.warn("Erro ao carregar comercios.json");
 
     }
-
-    console.log("Locais:", locais.length);
-
-    console.log("Comércios:", comercios.length);
 
 }
 
 /*
 =========================================================
-UTILITÁRIOS
+MENU
 =========================================================
 */
 
 function abrirSidebar(){
 
+    if(!sidebar){
+
+        return;
+
+    }
+
     menuAberto = true;
 
     sidebar.classList.add("open");
 
-    overlay.classList.add("show");
+    if(overlay){
+
+        overlay.classList.add("show");
+
+    }
 
 }
 
 function fecharSidebar(){
 
+    if(!sidebar){
+
+        return;
+
+    }
+
     menuAberto = false;
 
     sidebar.classList.remove("open");
 
-    overlay.classList.remove("show");
+    if(overlay){
+
+        overlay.classList.remove("show");
+
+    }
 
 }
 
 function alternarSidebar(){
 
     menuAberto
+
         ? fecharSidebar()
+
         : abrirSidebar();
 
 }
 
+/*
+=========================================================
+PESQUISA
+=========================================================
+*/
+
 function abrirPesquisa(){
+
+    if(!searchContainer){
+
+        return;
+
+    }
 
     pesquisaAberta = true;
 
     searchContainer.classList.add("open");
 
-    setTimeout(()=>{
+    if(searchInput){
 
-        searchInput.focus();
+        setTimeout(
 
-    },200);
+            ()=>searchInput.focus(),
+
+            200
+
+        );
+
+    }
 
 }
 
 function fecharPesquisa(){
 
+    if(!searchContainer){
+
+        return;
+
+    }
+
     pesquisaAberta = false;
 
     searchContainer.classList.remove("open");
 
-    searchInput.value = "";
+    if(searchInput){
+
+        searchInput.value="";
+
+    }
 
 }
 
 function alternarPesquisa(){
 
     pesquisaAberta
+
         ? fecharPesquisa()
+
         : abrirPesquisa();
 
 }
