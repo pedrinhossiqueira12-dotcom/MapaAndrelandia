@@ -32,6 +32,16 @@ function iniciarMarcadores(){
 
     criarMarcadoresComercios();
 
+    mapa.on(
+
+        "zoomend",
+
+        atualizarZoomMarcadores
+
+    );
+
+    atualizarZoomMarcadores();
+
 }
 
 /*
@@ -165,13 +175,11 @@ function criarIcone(dados){
 
     const icone =
 
-        dados.icone
+    dados.icone
 
-        ||
+        ? CONFIG.caminhos.icones + dados.icone
 
-        CONFIG.caminhos.icones +
-
-        "padrao.svg";
+        : CONFIG.caminhos.icones + "padrao.svg";
 
     return L.divIcon(
 
@@ -229,14 +237,13 @@ function selecionarMarcador(marcador){
 
     if(elemento){
 
-        elemento
+        const marker = elemento.querySelector(".marker");
 
-            .querySelector(".marker")
+if(marker){
 
-            .classList
+    marker.classList.add("marker-selecionado");
 
-            .add("marker-selecionado");
-
+}
     }
 
     centralizarMapa(
@@ -281,13 +288,13 @@ function limparMarcadorSelecionado(){
 
     if(elemento){
 
-        elemento
+        const marker = elemento.querySelector(".marker");
 
-            .querySelector(".marker")
+if(marker){
 
-            .classList
+    marker.classList.add("marker-selecionado");
 
-            .remove("marker-selecionado");
+}
 
     }
 
@@ -639,37 +646,6 @@ function recarregarMarcadores(){
 
 }
 
-/*
-=========================================================
-EVENTOS
-=========================================================
-*/
-
-if(typeof mapa !== "undefined"){
-
-    document.addEventListener(
-
-        "DOMContentLoaded",
-
-        ()=>{
-
-            if(mapa){
-
-                mapa.on(
-
-                    "zoomend",
-
-                    atualizarZoomMarcadores
-
-                );
-
-            }
-
-        }
-
-    );
-
-}
 /*
 =========================================================
 ANIMAÇÃO
