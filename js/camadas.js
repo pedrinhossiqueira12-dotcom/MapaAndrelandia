@@ -2,13 +2,13 @@
 =========================================================
 MAPA INTERATIVO DE ANDRELÂNDIA
 camadas.js
-Versão 1.0
+Versão 2.0
 =========================================================
 */
 
 /*
 =========================================================
-MODO DO MAPA
+MODOS
 =========================================================
 */
 
@@ -28,33 +28,20 @@ function iniciarCamadas(){
 
     atualizarModoMapa();
 
-    configurarBotaoCamadas();
+    if(btnSatellite){
 
-}
+        btnSatellite.addEventListener(
 
-/*
-=========================================================
-BOTÃO
-=========================================================
-*/
+            "click",
 
-function configurarBotaoCamadas(){
+            alternarModoMapa
 
-    if(!btnSatellite){
-
-        return;
+        );
 
     }
 
-    btnSatellite.addEventListener(
-
-        "click",
-
-        alternarModoMapa
-
-    );
-
 }
+
 /*
 =========================================================
 ALTERNAR
@@ -63,15 +50,13 @@ ALTERNAR
 
 function alternarModoMapa(){
 
-    if(modoMapa===MODO_PERGAMINHO){
+    modoMapa =
 
-        modoMapa=MODO_SATELITE;
+        modoMapa===MODO_PERGAMINHO
 
-    }else{
+        ? MODO_SATELITE
 
-        modoMapa=MODO_PERGAMINHO;
-
-    }
+        : MODO_PERGAMINHO;
 
     atualizarModoMapa();
 
@@ -85,6 +70,12 @@ ATUALIZAR
 
 function atualizarModoMapa(){
 
+    if(!mapa){
+
+        return;
+
+    }
+
     if(modoMapa===MODO_PERGAMINHO){
 
         ativarPergaminho();
@@ -96,6 +87,7 @@ function atualizarModoMapa(){
     }
 
 }
+
 /*
 =========================================================
 PERGAMINHO
@@ -116,13 +108,29 @@ function ativarPergaminho(){
 
     );
 
-    if(btnSatellite){
+    if(camadaSatelite){
 
-        btnSatellite.title="Modo Satélite";
+        mapa.removeLayer(
+
+            camadaSatelite
+
+        );
 
     }
 
     mostrarSVGMapa();
+
+    if(typeof atualizarTextura==="function"){
+
+        atualizarTextura();
+
+    }
+
+    if(btnSatellite){
+
+        btnSatellite.title = "Modo Satélite";
+
+    }
 
 }
 
@@ -146,15 +154,26 @@ function ativarSatelite(){
 
     );
 
-    if(btnSatellite){
+    if(camadaSatelite){
 
-        btnSatellite.title="Modo Pergaminho";
+        camadaSatelite.addTo(
+
+            mapa
+
+        );
 
     }
 
     ocultarSVGMapa();
 
+    if(btnSatellite){
+
+        btnSatellite.title = "Modo Pergaminho";
+
+    }
+
 }
+
 /*
 =========================================================
 SVG
@@ -169,15 +188,29 @@ function mostrarSVGMapa(){
 
     }
 
-    camadasSVG.forEach(camada=>{
+    camadasSVG.forEach(
 
-        if(camada && !mapa.hasLayer(camada)){
+        camada=>{
 
-            camada.addTo(mapa);
+            if(
+
+                camada &&
+
+                !mapa.hasLayer(camada)
+
+            ){
+
+                camada.addTo(
+
+                    mapa
+
+                );
+
+            }
 
         }
 
-    });
+    );
 
 }
 
@@ -189,14 +222,46 @@ function ocultarSVGMapa(){
 
     }
 
-    camadasSVG.forEach(camada=>{
+    camadasSVG.forEach(
 
-        if(camada && mapa.hasLayer(camada)){
+        camada=>{
 
-            mapa.removeLayer(camada);
+            if(
+
+                camada &&
+
+                mapa.hasLayer(camada)
+
+            ){
+
+                mapa.removeLayer(
+
+                    camada
+
+                );
+
+            }
 
         }
 
-    });
+    );
+
+}
+
+/*
+=========================================================
+UTILITÁRIOS
+=========================================================
+*/
+
+function mapaEstaEmPergaminho(){
+
+    return modoMapa===MODO_PERGAMINHO;
+
+}
+
+function mapaEstaEmSatelite(){
+
+    return modoMapa===MODO_SATELITE;
 
 }
