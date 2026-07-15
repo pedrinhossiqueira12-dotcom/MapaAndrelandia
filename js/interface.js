@@ -2,7 +2,13 @@
 =========================================================
 MAPA INTERATIVO DE ANDRELÂNDIA
 interface.js
-Versão 1.0
+Versão 2.0
+=========================================================
+*/
+
+/*
+=========================================================
+INICIAR
 =========================================================
 */
 
@@ -12,45 +18,55 @@ function iniciarInterface(){
 
     configurarPesquisa();
 
-    configurarOverlay();
+    configurarBotoes();
+
+    configurarTeclado();
 
 }
 
 /*
 =========================================================
-MENU LATERAL
+MENU
 =========================================================
 */
 
 function configurarMenu(){
 
-    btnMenu.addEventListener("click",()=>{
+    if(btnMenu){
 
-        alternarSidebar();
+        btnMenu.addEventListener(
 
-    });
+            "click",
 
-    btnCloseSidebar.addEventListener("click",()=>{
+            alternarSidebar
 
-        fecharSidebar();
+        );
 
-    });
+    }
 
-}
+    if(btnCloseSidebar){
 
-/*
-=========================================================
-OVERLAY
-=========================================================
-*/
+        btnCloseSidebar.addEventListener(
 
-function configurarOverlay(){
+            "click",
 
-    overlay.addEventListener("click",()=>{
+            fecharSidebar
 
-        fecharSidebar();
+        );
 
-    });
+    }
+
+    if(overlay){
+
+        overlay.addEventListener(
+
+            "click",
+
+            fecharSidebar
+
+        );
+
+    }
 
 }
 
@@ -62,34 +78,63 @@ PESQUISA
 
 function configurarPesquisa(){
 
-    btnSearch.addEventListener("click",()=>{
+    if(btnSearch){
 
-        alternarPesquisa();
+        btnSearch.addEventListener(
 
-    });
+            "click",
 
-    searchInput.addEventListener("keydown",(e)=>{
+            alternarPesquisa
 
-        if(e.key==="Escape"){
+        );
+
+    }
+
+    if(searchInput){
+
+        searchInput.addEventListener(
+
+            "keydown",
+
+            function(e){
+
+                if(e.key==="Escape"){
+
+                    fecharPesquisa();
+
+                }
+
+            }
+
+        );
+
+    }
+
+    document.addEventListener(
+
+        "click",
+
+        function(e){
+
+            if(
+
+                !pesquisaAberta ||
+
+                !searchContainer ||
+
+                searchContainer.contains(e.target)
+
+            ){
+
+                return;
+
+            }
 
             fecharPesquisa();
 
         }
 
-    });
-
-    document.addEventListener("click",(e)=>{
-
-        if(
-            !searchContainer.contains(e.target) &&
-            pesquisaAberta
-        ){
-
-            fecharPesquisa();
-
-        }
-
-    });
+    );
 
 }
 
@@ -99,29 +144,63 @@ BOTÕES
 =========================================================
 */
 
-if(btnLocate){
+function configurarBotoes(){
 
-    btnLocate.addEventListener("click",()=>{
+    if(btnLocate){
 
-        if(typeof centralizarUsuario==="function"){
+        btnLocate.addEventListener(
 
-            centralizarUsuario();
+            "click",
 
-        }
+            function(){
 
-    });
+                if(
+
+                    typeof centralizarUsuario==="function"
+
+                ){
+
+                    centralizarUsuario();
+
+                }
+
+            }
+
+        );
+
+    }
+
+    if(btnLayers){
+
+        btnLayers.addEventListener(
+
+            "click",
+
+            function(){
+
+                fecharPesquisa();
+
+                abrirSidebar();
+
+            }
+
+        );
+
+    }
+
+    if(btnSatellite){
+
+        btnSatellite.addEventListener(
+
+            "click",
+
+            alternarModoMapa
+
+        );
+
+    }
 
 }
-
-btnLayers.addEventListener("click",()=>{
-
-    fecharPesquisa();
-
-    abrirSidebar();
-
-});
-
-btnSatellite.addEventListener("click",alternarModoMapa);
 
 /*
 =========================================================
@@ -129,14 +208,26 @@ TECLADO
 =========================================================
 */
 
-document.addEventListener("keydown",(e)=>{
+function configurarTeclado(){
 
-    if(e.key==="Escape"){
+    document.addEventListener(
 
-        fecharSidebar();
+        "keydown",
 
-        fecharPesquisa();
+        function(e){
 
-    }
+            if(e.key!=="Escape"){
 
-});
+                return;
+
+            }
+
+            fecharSidebar();
+
+            fecharPesquisa();
+
+        }
+
+    );
+
+}
