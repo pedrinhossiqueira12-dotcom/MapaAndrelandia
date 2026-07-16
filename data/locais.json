@@ -1,0 +1,29 @@
+{
+  "id": "matriz",
+  "nome": "Igreja Matriz de Nossa Senhora do Porto da Eterna Salvação",
+  "categoria": "Igreja",
+  "icone": "igreja.svg",
+
+  "latitude": -21.741350,
+  "longitude": -44.309200,
+
+  "endereco": "Praça João Zuquim, Centro",
+
+  "descricaoCurta": "Principal cartão-postal de Andrelândia.",
+
+  "descricao": "",
+
+  "historia": "",
+
+  "curiosidades": "",
+
+  "tempoVisita": "20 a 40 minutos",
+
+  "foto": "img/locais/matriz/capa.webp",
+
+  "galeria": [
+    "img/locais/matriz/1.webp",
+    "img/locais/matriz/2.webp",
+    "img/locais/matriz/3.webp"
+  ]
+}
