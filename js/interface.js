@@ -78,37 +78,46 @@ PESQUISA
 
 function configurarPesquisa(){
 
-    if(btnSearch){
+    if(
+        !btnSearch ||
+        !searchContainer ||
+        !searchInput
+    ){
 
-        btnSearch.addEventListener(
-
-            "click",
-
-            alternarPesquisa
-
-        );
+        return;
 
     }
 
-    if(searchInput){
+    btnSearch.addEventListener("click",()=>{
 
-        searchInput.addEventListener(
+        alternarPesquisa();
 
-            "keydown",
+    });
 
-            function(e){
+    searchInput.addEventListener("keydown",(e)=>{
 
-                if(e.key==="Escape"){
+        if(e.key==="Escape"){
 
-                    fecharPesquisa();
+            fecharPesquisa();
 
-                }
+        }
 
-            }
+    });
 
-        );
+    document.addEventListener("click",(e)=>{
 
-    }
+        if(
+            !searchContainer.contains(e.target) &&
+            pesquisaAberta
+        ){
+
+            fecharPesquisa();
+
+        }
+
+    });
+
+}
 
     document.addEventListener(
 
@@ -163,24 +172,6 @@ function configurarBotoes(){
                     centralizarUsuario();
 
                 }
-
-            }
-
-        );
-
-    }
-
-    if(btnLayers){
-
-        btnLayers.addEventListener(
-
-            "click",
-
-            function(){
-
-                fecharPesquisa();
-
-                abrirSidebar();
 
             }
 
