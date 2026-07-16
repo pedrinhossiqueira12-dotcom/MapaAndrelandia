@@ -167,6 +167,11 @@ async function iniciarSistema(){
         iniciarMarcadores();
 
     }
+    if(typeof iniciarPopup==="function"){
+
+    iniciarPopup();
+
+    }
 
 }
 
