@@ -2,7 +2,7 @@
 =========================================================
 MAPA INTERATIVO DE ANDRELÂNDIA
 pesquisa.js
-Versão 2.0
+Versão 3.0
 =========================================================
 */
 
@@ -26,25 +26,35 @@ function iniciarPesquisa(){
 
     criarIndicePesquisa();
 
-    if(searchInput){
+    if(!searchInput){
 
-        searchInput.addEventListener(
-
-            "input",
-
-            pesquisar
-
-        );
-
-        searchInput.addEventListener(
-
-            "keydown",
-
-            teclaPesquisa
-
-        );
+        return;
 
     }
+
+    searchInput.addEventListener(
+
+        "input",
+
+        pesquisar
+
+    );
+
+    searchInput.addEventListener(
+
+        "keydown",
+
+        teclaPesquisa
+
+    );
+
+    document.addEventListener(
+
+        "click",
+
+        clicarForaPesquisa
+
+    );
 
 }
 
@@ -74,15 +84,25 @@ NORMALIZAR
 
 function normalizarTexto(texto){
 
-    return String(texto || "")
+    return String(
 
-        .toLowerCase()
+        texto || ""
 
-        .normalize("NFD")
+    )
 
-        .replace(/[\u0300-\u036f]/g,"")
+    .normalize("NFD")
 
-        .trim();
+    .replace(
+
+        /[\u0300-\u036f]/g,
+
+        ""
+
+    )
+
+    .toLowerCase()
+
+    .trim();
 
 }
 
@@ -114,23 +134,90 @@ function pesquisar(){
 
     }
 
-    resultadosPesquisa = indicePesquisa.filter(
+    resultadosPesquisa = indicePesquisa
 
-        item =>
+        .filter(
 
-            normalizarTexto(item.nome)
+            item=>{
 
-            .includes(texto)
+                const conteudo = [
 
-    );
+                    item.nome,
+
+                    item.categoria,
+
+                    item.endereco,
+
+                    item.descricaoCurta,
+
+                    item.descricao,
+
+                    item.palavrasChave
+
+                ]
+
+                .join(" ")
+
+                .toLowerCase();
+
+                return normalizarTexto(
+
+                    conteudo
+
+                ).includes(
+
+                    texto
+
+                );
+
+            }
+
+        )
+
+        .sort(
+
+            (a,b)=>{
+
+                const aInicio = normalizarTexto(
+
+                    a.nome
+
+                ).startsWith(
+
+                    texto
+
+                );
+
+                const bInicio = normalizarTexto(
+
+                    b.nome
+
+                ).startsWith(
+
+                    texto
+
+                );
+
+                return bInicio-aInicio;
+
+            }
+
+        )
+
+        .slice(
+
+            0,
+
+            10
+
+        );
 
     mostrarResultados();
 
 }
-
 /*
 =========================================================
-RESULTADOS
+MOSTRAR RESULTADOS
 =========================================================
 */
 
@@ -140,9 +227,9 @@ function mostrarResultados(){
 
     if(
 
-        resultadosPesquisa.length===0 ||
+        !searchContainer ||
 
-        !searchContainer
+        resultadosPesquisa.length===0
 
     ){
 
@@ -150,7 +237,11 @@ function mostrarResultados(){
 
     }
 
-    const lista = document.createElement("div");
+    const lista = document.createElement(
+
+        "div"
+
+    );
 
     lista.id = "listaResultados";
 
@@ -158,25 +249,51 @@ function mostrarResultados(){
 
         item=>{
 
-            const botao = document.createElement("button");
+            const botao = document.createElement(
 
-            botao.className = "resultadoPesquisa";
+                "button"
+
+            );
+
+            botao.type = "button";
+
+            botao.className =
+
+                "resultadoPesquisa";
+
+            const icone =
+
+                item.icone ||
+
+                "padrao.svg";
 
             botao.innerHTML = `
 
                 <div class="resultadoIcone">
 
                     <img
-                        src="${CONFIG.caminhos.icones}${item.icone}"
-                        alt="">
+
+                        src="${CONFIG.caminhos.icones}${icone}"
+
+                        alt=""
+
+                        draggable="false">
 
                 </div>
 
                 <div class="resultadoTexto">
 
-                    <strong>${item.nome}</strong>
+                    <strong>
 
-                    <span>${item.categoria}</span>
+                        ${escaparHTML(item.nome)}
+
+                    </strong>
+
+                    <span>
+
+                        ${escaparHTML(item.categoria || "")}
+
+                    </span>
 
                 </div>
 
@@ -188,25 +305,37 @@ function mostrarResultados(){
 
                 ()=>{
 
-                    selecionarResultado(item);
+                    selecionarResultado(
+
+                        item
+
+                    );
 
                 }
 
             );
 
-            lista.appendChild(botao);
+            lista.appendChild(
+
+                botao
+
+            );
 
         }
 
     );
 
-    searchContainer.appendChild(lista);
+    searchContainer.appendChild(
+
+        lista
+
+    );
 
 }
 
 /*
 =========================================================
-SELECIONAR
+SELECIONAR RESULTADO
 =========================================================
 */
 
@@ -222,7 +351,11 @@ function selecionarResultado(item){
 
     ){
 
-        abrirMarcador(item.id);
+        abrirMarcador(
+
+            item.id
+
+        );
 
     }
 
@@ -240,7 +373,7 @@ function teclaPesquisa(e){
 
         e.key==="Enter" &&
 
-        resultadosPesquisa.length
+        resultadosPesquisa.length>0
 
     ){
 
@@ -258,7 +391,42 @@ function teclaPesquisa(e){
 
 /*
 =========================================================
-LIMPAR
+CLIQUE FORA
+=========================================================
+*/
+
+function clicarForaPesquisa(e){
+
+    if(
+
+        !searchContainer
+
+    ){
+
+        return;
+
+    }
+
+    if(
+
+        searchContainer.contains(
+
+            e.target
+
+        )
+
+    ){
+
+        return;
+
+    }
+
+    limparResultados();
+
+}
+/*
+=========================================================
+LIMPAR RESULTADOS
 =========================================================
 */
 
@@ -269,6 +437,12 @@ function limparResultados(){
     removerListaResultados();
 
 }
+
+/*
+=========================================================
+REMOVER LISTA
+=========================================================
+*/
 
 function removerListaResultados(){
 
@@ -288,7 +462,7 @@ function removerListaResultados(){
 
 /*
 =========================================================
-ATUALIZAR
+ATUALIZAR ÍNDICE
 =========================================================
 */
 
@@ -296,4 +470,62 @@ function atualizarIndicePesquisa(){
 
     criarIndicePesquisa();
 
+    limparResultados();
+
 }
+
+/*
+=========================================================
+OBTER RESULTADOS
+=========================================================
+*/
+
+function obterResultadosPesquisa(){
+
+    return resultadosPesquisa;
+
+}
+
+/*
+=========================================================
+VERIFICAR PESQUISA
+=========================================================
+*/
+
+function pesquisaAtiva(){
+
+    return (
+
+        searchInput &&
+
+        searchInput.value.trim() !== ""
+
+    );
+
+}
+
+/*
+=========================================================
+API
+=========================================================
+*/
+
+window.pesquisaAPI = {
+
+    pesquisar,
+
+    atualizarIndicePesquisa,
+
+    limparResultados,
+
+    obterResultadosPesquisa,
+
+    pesquisaAtiva
+
+};
+
+/*
+=========================================================
+FIM
+=========================================================
+*/
