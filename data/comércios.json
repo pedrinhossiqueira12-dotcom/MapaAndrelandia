@@ -1,0 +1,37 @@
+{
+    "id": "cafeteria-exemplo",
+
+    "nome": "Cafeteria Exemplo",
+
+    "categoria": "Cafeteria",
+
+    "icone": "cafe.svg",
+
+    "latitude": 0,
+
+    "longitude": 0,
+
+    "endereco": "",
+
+    "telefone": "",
+
+    "whatsapp": "",
+
+    "instagram": "",
+
+    "site": "",
+
+    "descricaoCurta": "",
+
+    "descricao": "",
+
+    "horario": "",
+
+    "foto": "img/comercios/cafeteria-exemplo/capa.webp",
+
+    "galeria": [
+        "img/comercios/cafeteria-exemplo/1.webp",
+        "img/comercios/cafeteria-exemplo/2.webp",
+        "img/comercios/cafeteria-exemplo/3.webp"
+    ]
+}
