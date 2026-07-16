@@ -2,13 +2,13 @@
 =========================================================
 MAPA INTERATIVO DE ANDRELÂNDIA
 mapa.js
-Versão 3.0
+Versão 4.0
 =========================================================
 */
 
 /*
 =========================================================
-LIMITES
+LIMITES DO MAPA
 =========================================================
 */
 
@@ -46,41 +46,41 @@ function iniciarMapa(){
 
         {
 
-            center:CONFIG.centro,
+            center: CONFIG.centro,
 
-            zoom:CONFIG.zoomInicial,
+            zoom: CONFIG.zoomInicial,
 
-            minZoom:CONFIG.zoomMinimo,
+            minZoom: CONFIG.zoomMinimo,
 
-            maxZoom:CONFIG.zoomMaximo,
+            maxZoom: CONFIG.zoomMaximo,
 
-            zoomControl:false,
+            zoomControl: false,
 
-            attributionControl:false,
+            attributionControl: false,
 
-            preferCanvas:true,
+            preferCanvas: true,
 
-            zoomSnap:0.25,
+            zoomSnap: 0.25,
 
-            zoomDelta:0.25,
+            zoomDelta: 0.25,
 
-            wheelPxPerZoomLevel:120,
+            wheelPxPerZoomLevel: 120,
 
-            inertia:true,
+            inertia: true,
 
-            inertiaDeceleration:2500,
+            inertiaDeceleration: 2500,
 
-            worldCopyJump:false,
+            worldCopyJump: false,
 
-            maxBounds:LIMITES_MAPA,
+            maxBounds: LIMITES_MAPA,
 
-            maxBoundsViscosity:1,
+            maxBoundsViscosity: 1,
 
-            zoomAnimation:true,
+            zoomAnimation: true,
 
-            fadeAnimation:true,
+            fadeAnimation: true,
 
-            markerZoomAnimation:true
+            markerZoomAnimation: true
 
         }
 
@@ -108,6 +108,16 @@ PANES
 
 function criarPanes(){
 
+    if(
+
+        mapa.getPane("paneSVG")
+
+    ){
+
+        return;
+
+    }
+
     mapa.createPane(
 
         "paneSVG"
@@ -124,7 +134,7 @@ function criarPanes(){
 
 /*
 =========================================================
-SATÉLITE
+CAMADA SATÉLITE
 =========================================================
 */
 
@@ -136,19 +146,19 @@ function criarCamadaSatelite(){
 
         {
 
-            attribution:"© Esri",
+            attribution: "© Esri",
 
-            maxZoom:20,
+            maxZoom: 20,
 
-            maxNativeZoom:19,
+            maxNativeZoom: 19,
 
-            noWrap:true,
+            noWrap: true,
 
-            keepBuffer:6,
+            keepBuffer: 6,
 
-            updateWhenIdle:true,
+            updateWhenIdle: true,
 
-            updateWhenZooming:false
+            updateWhenZooming: false
 
         }
 
@@ -169,7 +179,7 @@ CAMADAS SVG
 
 function criarCamadasSVG(){
 
-    camadasSVG.length = 0;
+    limparCamadasSVG();
 
     adicionarSVG("ruas.svg");
 
@@ -193,19 +203,31 @@ function adicionarSVG(nome){
 
         {
 
-            pane:"paneSVG",
+            pane: "paneSVG",
 
-            opacity:1,
+            opacity: 1,
 
-            interactive:false
+            interactive: false
 
         }
 
     );
 
-    camada.addTo(mapa);
+    camadasSVG.push(
 
-    camadasSVG.push(camada);
+        camada
+
+    );
+
+    if(mapaIlustrado){
+
+        camada.addTo(
+
+            mapa
+
+        );
+
+    }
 
 }
 
@@ -249,16 +271,21 @@ function criarTexturaPergaminho(){
 
     textura.style.pointerEvents = "none";
 
-    textura.style.zIndex = "340";
+    textura.style.zIndex = "349";
 
     textura.style.opacity = ".38";
 
     textura.style.backgroundImage =
+
         "url('img/interface/papel.webp')";
 
-    textura.style.backgroundRepeat = "repeat";
+    textura.style.backgroundRepeat =
 
-    textura.style.backgroundSize = "700px";
+        "repeat";
+
+    textura.style.backgroundSize =
+
+        "700px";
 
     mapa.getContainer().appendChild(
 
@@ -270,7 +297,134 @@ function criarTexturaPergaminho(){
 
 /*
 =========================================================
-MODOS
+ATUALIZAR TEXTURA
+=========================================================
+*/
+
+function atualizarTexturaPergaminho(){
+
+    const textura = document.getElementById(
+
+        "texturaPergaminho"
+
+    );
+
+    if(!textura){
+
+        return;
+
+    }
+
+    textura.style.display =
+
+        mapaIlustrado
+
+            ? "block"
+
+            : "none";
+
+}
+
+/*
+=========================================================
+MOSTRAR SVGs
+=========================================================
+*/
+
+function mostrarSVGs(){
+
+    if(!camadasSVG.length){
+
+        return;
+
+    }
+
+    camadasSVG.forEach(
+
+        camada=>{
+
+            if(
+
+                !mapa.hasLayer(
+
+                    camada
+
+                )
+
+            ){
+
+                camada.addTo(
+
+                    mapa
+
+                );
+
+            }
+
+        }
+
+    );
+
+}
+
+/*
+=========================================================
+ESCONDER SVGs
+=========================================================
+*/
+
+function esconderSVGs(){
+
+    if(!camadasSVG.length){
+
+        return;
+
+    }
+
+    camadasSVG.forEach(
+
+        camada=>{
+
+            if(
+
+                mapa.hasLayer(
+
+                    camada
+
+                )
+
+            ){
+
+                mapa.removeLayer(
+
+                    camada
+
+                );
+
+            }
+
+        }
+
+    );
+
+}
+
+/*
+=========================================================
+RECARREGAR SVGs
+=========================================================
+*/
+
+function recarregarSVGs(){
+
+    limparCamadasSVG();
+
+    criarCamadasSVG();
+
+}
+/*
+=========================================================
+MODOS DO MAPA
 =========================================================
 */
 
@@ -295,6 +449,7 @@ function alternarModoMapa(){
     atualizarModoMapa();
 
 }
+
 /*
 =========================================================
 MODO PERGAMINHO
@@ -315,31 +470,9 @@ function ativarModoPergaminho(){
 
     );
 
-    const textura = document.getElementById(
+    atualizarTexturaPergaminho();
 
-        "texturaPergaminho"
-
-    );
-
-    if(textura){
-
-        textura.style.display = "block";
-
-    }
-
-    camadasSVG.forEach(
-
-        camada=>{
-
-            if(!mapa.hasLayer(camada)){
-
-                camada.addTo(mapa);
-
-            }
-
-        }
-
-    );
+    mostrarSVGs();
 
     atualizarBotaoModo();
 
@@ -365,31 +498,9 @@ function ativarModoSatelite(){
 
     );
 
-    const textura = document.getElementById(
+    atualizarTexturaPergaminho();
 
-        "texturaPergaminho"
-
-    );
-
-    if(textura){
-
-        textura.style.display = "none";
-
-    }
-
-    camadasSVG.forEach(
-
-        camada=>{
-
-            if(mapa.hasLayer(camada)){
-
-                mapa.removeLayer(camada);
-
-            }
-
-        }
-
-    );
+    esconderSVGs();
 
     atualizarBotaoModo();
 
@@ -397,7 +508,7 @@ function ativarModoSatelite(){
 
 /*
 =========================================================
-BOTÃO SATÉLITE
+BOTÃO DO MODO
 =========================================================
 */
 
@@ -437,6 +548,10 @@ function atualizarBotaoModo(){
 
             "Modo Satélite";
 
+        botao.title =
+
+            "Modo Satélite";
+
     }else{
 
         imagem.src =
@@ -447,54 +562,34 @@ function atualizarBotaoModo(){
 
             "Modo Pergaminho";
 
+        botao.title =
+
+            "Modo Pergaminho";
+
     }
 
 }
 
 /*
 =========================================================
-MOSTRAR / ESCONDER SVGs
+DEFINIR MODO
 =========================================================
 */
 
-function mostrarSVGs(){
+function definirModoMapa(pergaminho){
 
-    camadasSVG.forEach(
+    mapaIlustrado = Boolean(
 
-        camada=>{
-
-            if(!mapa.hasLayer(camada)){
-
-                camada.addTo(mapa);
-
-            }
-
-        }
+        pergaminho
 
     );
 
-}
-
-function esconderSVGs(){
-
-    camadasSVG.forEach(
-
-        camada=>{
-
-            if(mapa.hasLayer(camada)){
-
-                mapa.removeLayer(camada);
-
-            }
-
-        }
-
-    );
+    atualizarModoMapa();
 
 }
 /*
 =========================================================
-EVENTOS
+EVENTOS DO MAPA
 =========================================================
 */
 
@@ -512,7 +607,17 @@ function registrarEventosMapa(){
 
         "zoomend",
 
-        atualizarZoom
+        ()=>{
+
+            atualizarZoom();
+
+            if(typeof atualizarZoomMarcadores==="function"){
+
+                atualizarZoomMarcadores();
+
+            }
+
+        }
 
     );
 
@@ -524,9 +629,7 @@ function registrarEventosMapa(){
 
     );
 
-    mapa.on(
-
-        "load",
+    mapa.whenReady(
 
         mapaCarregado
 
@@ -550,7 +653,7 @@ function mapaCarregado(){
 
 /*
 =========================================================
-CLIQUE
+CLIQUE NO MAPA
 =========================================================
 */
 
@@ -572,13 +675,17 @@ ZOOM
 
 function atualizarZoom(){
 
-    const zoom = mapa.getZoom();
+    if(!mapa){
+
+        return;
+
+    }
 
     document.body.setAttribute(
 
         "data-zoom",
 
-        zoom
+        mapa.getZoom()
 
     );
 
@@ -593,9 +700,8 @@ MOVIMENTO
 function atualizarMovimento(){
 
     /*
-    Reservado para futuras funções
-    como carregamento dinâmico,
-    clusters e otimizações.
+    Espaço reservado para
+    futuras otimizações.
     */
 
 }
@@ -615,6 +721,12 @@ function centralizarMapa(
     zoom = 18
 
 ){
+
+    if(!mapa){
+
+        return;
+
+    }
 
     mapa.flyTo(
 
@@ -642,11 +754,17 @@ function centralizarMapa(
 
 /*
 =========================================================
-ENQUADRAR
+ENQUADRAR ÁREA
 =========================================================
 */
 
 function enquadrarMapa(bounds){
+
+    if(!mapa){
+
+        return;
+
+    }
 
     mapa.fitBounds(
 
@@ -654,13 +772,7 @@ function enquadrarMapa(bounds){
 
         {
 
-            padding:[
-
-                40,
-
-                40
-
-            ],
+            padding:[40,40],
 
             animate:true
 
@@ -678,6 +790,12 @@ REDIMENSIONAR
 
 function atualizarTamanhoMapa(){
 
+    if(!mapa){
+
+        return;
+
+    }
+
     mapa.invalidateSize(
 
         {
@@ -694,65 +812,27 @@ window.addEventListener(
 
     "resize",
 
-    atualizarTamanhoMapa
+    ()=>{
 
-);/*
-=========================================================
-ATUALIZAR TEXTURA
-=========================================================
-*/
-
-function atualizarTexturaPergaminho(){
-
-    const textura = document.getElementById(
-
-        "texturaPergaminho"
-
-    );
-
-    if(!textura){
-
-        return;
+        atualizarTamanhoMapa();
 
     }
 
-    textura.style.display =
-
-        mapaIlustrado
-
-            ? "block"
-
-            : "none";
-
-}
+);
 
 /*
 =========================================================
-RECARREGAR CAMADAS SVG
-=========================================================
-*/
-
-function recarregarSVGs(){
-
-    esconderSVGs();
-
-    criarCamadasSVG();
-
-    if(mapaIlustrado){
-
-        mostrarSVGs();
-
-    }
-
-}
-
-/*
-=========================================================
-ATUALIZAR LIMITES
+LIMITES
 =========================================================
 */
 
 function atualizarLimites(bounds){
+
+    if(!mapa){
+
+        return;
+
+    }
 
     mapa.setMaxBounds(
 
@@ -770,6 +850,12 @@ OBTER CENTRO
 
 function obterCentroMapa(){
 
+    if(!mapa){
+
+        return null;
+
+    }
+
     return mapa.getCenter();
 
 }
@@ -781,6 +867,12 @@ OBTER ZOOM
 */
 
 function obterZoomMapa(){
+
+    if(!mapa){
+
+        return null;
+
+    }
 
     return mapa.getZoom();
 
@@ -794,6 +886,12 @@ VERIFICAR CAMADA
 
 function possuiCamada(camada){
 
+    if(!mapa){
+
+        return false;
+
+    }
+
     return mapa.hasLayer(
 
         camada
@@ -801,10 +899,9 @@ function possuiCamada(camada){
     );
 
 }
-
 /*
 =========================================================
-REMOVER TODAS AS CAMADAS SVG
+LIMPAR CAMADAS SVG
 =========================================================
 */
 
@@ -814,7 +911,17 @@ function limparCamadasSVG(){
 
         camada=>{
 
-            if(mapa.hasLayer(camada)){
+            if(
+
+                mapa &&
+
+                mapa.hasLayer(
+
+                    camada
+
+                )
+
+            ){
 
                 mapa.removeLayer(
 
@@ -828,29 +935,13 @@ function limparCamadasSVG(){
 
     );
 
-    camadasSVG.length = 0;
+    camadasSVG = [];
 
 }
 
 /*
 =========================================================
-ATUALIZAR MODO
-=========================================================
-*/
-
-function definirModoMapa(pergaminho){
-
-    mapaIlustrado = pergaminho;
-
-    atualizarModoMapa();
-
-    atualizarTexturaPergaminho();
-
-}
-
-/*
-=========================================================
-REDESENHAR
+REDESENHAR MAPA
 =========================================================
 */
 
@@ -864,7 +955,35 @@ function redesenharMapa(){
 
 /*
 =========================================================
-EXPORTAR (FUTURO)
+ATUALIZAR CAMADAS
+=========================================================
+*/
+
+function atualizarCamadasMapa(){
+
+    recarregarSVGs();
+
+    atualizarModoMapa();
+
+}
+
+/*
+=========================================================
+RECARREGAR MAPA
+=========================================================
+*/
+
+function recarregarMapa(){
+
+    atualizarCamadasMapa();
+
+    atualizarZoom();
+
+}
+
+/*
+=========================================================
+API PÚBLICA
 =========================================================
 */
 
@@ -881,6 +1000,10 @@ window.mapaAPI = {
     obterZoomMapa,
 
     definirModoMapa,
+
+    atualizarCamadasMapa,
+
+    recarregarMapa,
 
     redesenharMapa
 
