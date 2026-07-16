@@ -184,7 +184,7 @@ function obterElementos(){
 
     btnLocate = document.getElementById("btnGPS");
 
-    btnLayers = document.getElementById("menuDireito");
+    btnLayers = null;
 
     btnSatellite = document.getElementById("btnSatellite");
 
