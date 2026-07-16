@@ -1,29 +1,304 @@
-{
-  "id": "matriz",
-  "nome": "Igreja Matriz de Nossa Senhora do Porto da Eterna Salvação",
-  "categoria": "Igreja",
-  "icone": "igreja.svg",
+[
+    {
+        "id": "matriz",
 
-  "latitude": -21.741350,
-  "longitude": -44.309200,
+        "nome": "Igreja Matriz de Nossa Senhora do Porto da Eterna Salvação",
 
-  "endereco": "Praça João Zuquim, Centro",
+        "categoria": "Igreja",
 
-  "descricaoCurta": "Principal cartão-postal de Andrelândia.",
+        "icone": "igreja.svg",
 
-  "descricao": "",
+        "latitude": -21.741350,
 
-  "historia": "",
+        "longitude": -44.309200,
 
-  "curiosidades": "",
+        "endereco": "Praça João Zuquim, Centro, Andrelândia - MG",
 
-  "tempoVisita": "20 a 40 minutos",
+        "descricaoCurta": "Principal templo religioso e um dos maiores símbolos históricos de Andrelândia.",
 
-  "foto": "img/locais/matriz/capa.webp",
+        "descricao": "A Igreja Matriz de Nossa Senhora do Porto da Eterna Salvação é o principal patrimônio religioso de Andrelândia. Sua arquitetura imponente domina o centro histórico da cidade e representa parte importante da identidade cultural do município.",
 
-  "galeria": [
-    "img/locais/matriz/1.webp",
-    "img/locais/matriz/2.webp",
-    "img/locais/matriz/3.webp"
-  ]
-}
+        "historia": "A construção da igreja acompanha o desenvolvimento da antiga Vila Bela do Turvo, tornando-se um dos edifícios mais importantes da história de Andrelândia. Ao longo dos anos passou por ampliações e restaurações, preservando sua importância religiosa e arquitetônica.",
+
+        "curiosidades": "Além de ser um dos cartões-postais da cidade, a igreja abriga importantes celebrações religiosas, festas tradicionais e possui diversos elementos arquitetônicos preservados.",
+
+        "tempoVisita": "20 a 40 minutos",
+
+        "foto": "img/locais/matriz/capa.webp",
+
+        "galeria": [
+            "img/locais/matriz/1.webp",
+            "img/locais/matriz/2.webp",
+            "img/locais/matriz/3.webp"
+        ]
+    },
+
+    {
+        "id": "sao-benedito",
+
+        "nome": "Capela de São Benedito",
+
+        "categoria": "Igreja",
+
+        "icone": "igreja.svg",
+
+        "latitude": -21.742010,
+
+        "longitude": -44.307650,
+
+        "endereco": "Centro, Andrelândia - MG",
+
+        "descricaoCurta": "Uma das igrejas mais tradicionais e fotografadas da cidade.",
+
+        "descricao": "A Capela de São Benedito destaca-se por sua arquitetura histórica e por sua forte ligação com a cultura e a religiosidade local.",
+
+        "historia": "Construída para atender à comunidade local, tornou-se um importante espaço religioso e cultural ao longo das décadas.",
+
+        "curiosidades": "Sua fachada é considerada uma das mais bonitas de Andrelândia e frequentemente aparece em registros fotográficos e materiais turísticos.",
+
+        "tempoVisita": "15 a 30 minutos",
+
+        "foto": "img/locais/sao-benedito/capa.webp",
+
+        "galeria": [
+            "img/locais/sao-benedito/1.webp",
+            "img/locais/sao-benedito/2.webp",
+            "img/locais/sao-benedito/3.webp"
+        ]
+    },
+      {
+        "id": "rosario",
+
+        "nome": "Igreja de Nossa Senhora do Rosário",
+
+        "categoria": "Igreja",
+
+        "icone": "igreja.svg",
+
+        "latitude": -21.742430,
+
+        "longitude": -44.308170,
+
+        "endereco": "Centro, Andrelândia - MG",
+
+        "descricaoCurta": "Tradicional igreja histórica que faz parte do patrimônio religioso de Andrelândia.",
+
+        "descricao": "A Igreja de Nossa Senhora do Rosário preserva importantes características da arquitetura religiosa mineira e representa uma parte significativa da história da cidade.",
+
+        "historia": "Ao longo de sua história, a igreja tornou-se palco de diversas celebrações religiosas e manifestações culturais da comunidade andrelandense.",
+
+        "curiosidades": "Sua arquitetura simples e elegante faz dela um dos edifícios históricos mais conhecidos do município.",
+
+        "tempoVisita": "15 a 30 minutos",
+
+        "foto": "img/locais/rosario/capa.webp",
+
+        "galeria": [
+            "img/locais/rosario/1.webp",
+            "img/locais/rosario/2.webp",
+            "img/locais/rosario/3.webp"
+        ]
+    },
+
+    {
+        "id": "estacao",
+
+        "nome": "Antiga Estação Ferroviária",
+
+        "categoria": "Patrimônio Histórico",
+
+        "icone": "estacao.svg",
+
+        "latitude": -21.744120,
+
+        "longitude": -44.306980,
+
+        "endereco": "Centro, Andrelândia - MG",
+
+        "descricaoCurta": "Importante marco do desenvolvimento ferroviário da cidade.",
+
+        "descricao": "A antiga estação ferroviária preserva a memória da época em que a ferrovia desempenhava papel fundamental no transporte de passageiros e mercadorias na região.",
+
+        "historia": "Durante muitos anos, a estação foi responsável por conectar Andrelândia a diversas cidades, contribuindo para o crescimento econômico e social do município.",
+
+        "curiosidades": "Mesmo após o encerramento das atividades ferroviárias, o edifício continua sendo uma das construções históricas mais lembradas da cidade.",
+
+        "tempoVisita": "20 a 40 minutos",
+
+        "foto": "img/locais/estacao/capa.webp",
+
+        "galeria": [
+            "img/locais/estacao/1.webp",
+            "img/locais/estacao/2.webp",
+            "img/locais/estacao/3.webp"
+        ]
+    },
+      {
+        "id": "cristo",
+
+        "nome": "Mirante do Cristo",
+
+        "categoria": "Mirante",
+
+        "icone": "mirante.svg",
+
+        "latitude": -21.739820,
+
+        "longitude": -44.311740,
+
+        "endereco": "Morro do Cristo, Andrelândia - MG",
+
+        "descricaoCurta": "Um dos melhores lugares para contemplar a cidade de Andrelândia.",
+
+        "descricao": "O Mirante do Cristo oferece uma vista panorâmica privilegiada de Andrelândia e das montanhas da Serra da Mantiqueira. É um dos pontos mais visitados por moradores e turistas.",
+
+        "historia": "Construído para servir como espaço de contemplação e fé, o local tornou-se um dos principais cartões-postais da cidade e recebe visitantes durante todo o ano.",
+
+        "curiosidades": "O nascer e o pôr do sol vistos do mirante proporcionam algumas das paisagens mais bonitas de Andrelândia.",
+
+        "tempoVisita": "20 a 40 minutos",
+
+        "foto": "img/locais/cristo/capa.webp",
+
+        "galeria": [
+            "img/locais/cristo/1.webp",
+            "img/locais/cristo/2.webp",
+            "img/locais/cristo/3.webp"
+        ]
+    },
+
+    {
+        "id": "parque-arqueologico",
+
+        "nome": "Parque Arqueológico da Serra de Santo Antônio",
+
+        "categoria": "Parque",
+
+        "icone": "parque.svg",
+
+        "latitude": -21.754230,
+
+        "longitude": -44.319410,
+
+        "endereco": "Serra de Santo Antônio, Andrelândia - MG",
+
+        "descricaoCurta": "Área de grande importância arqueológica, histórica e ambiental.",
+
+        "descricao": "O Parque Arqueológico da Serra de Santo Antônio preserva sítios arqueológicos, formações naturais e trilhas que permitem conhecer parte da história dos primeiros habitantes da região.",
+
+        "historia": "As pesquisas arqueológicas realizadas na área identificaram vestígios de ocupações humanas muito antigas, tornando o parque uma importante referência para estudos históricos no sul de Minas Gerais.",
+
+        "curiosidades": "Além do patrimônio arqueológico, o parque possui belas paisagens naturais, trilhas e mirantes que atraem visitantes interessados em natureza e história.",
+
+        "tempoVisita": "1 a 3 horas",
+
+        "foto": "img/locais/parque/capa.webp",
+
+        "galeria": [
+            "img/locais/parque/1.webp",
+            "img/locais/parque/2.webp",
+            "img/locais/parque/3.webp"
+        ]
+    },
+      {
+        "id": "fundacao-guaira",
+
+        "nome": "Casarão da Fundação Guaíra",
+
+        "categoria": "Patrimônio Histórico",
+
+        "icone": "casarao.svg",
+
+        "latitude": -21.742680,
+
+        "longitude": -44.308930,
+
+        "endereco": "Centro, Andrelândia - MG",
+
+        "descricaoCurta": "Um dos casarões históricos mais importantes de Andrelândia.",
+
+        "descricao": "O Casarão da Fundação Guaíra preserva parte da arquitetura colonial do município e representa um importante patrimônio cultural da cidade.",
+
+        "historia": "Ao longo de sua existência, o casarão teve diferentes funções e atualmente faz parte da preservação da memória histórica de Andrelândia.",
+
+        "curiosidades": "Sua arquitetura mantém diversos elementos originais, sendo um dos edifícios históricos mais fotografados do centro da cidade.",
+
+        "tempoVisita": "20 a 40 minutos",
+
+        "foto": "img/locais/fundacao-guaira/capa.webp",
+
+        "galeria": [
+            "img/locais/fundacao-guaira/1.webp",
+            "img/locais/fundacao-guaira/2.webp",
+            "img/locais/fundacao-guaira/3.webp"
+        ]
+    },
+
+    {
+        "id": "sobrado-barao",
+
+        "nome": "Sobrado Barão do Cabo Verde",
+
+        "categoria": "Patrimônio Histórico",
+
+        "icone": "casarao.svg",
+
+        "latitude": -21.742510,
+
+        "longitude": -44.309020,
+
+        "endereco": "Centro, Andrelândia - MG",
+
+        "descricaoCurta": "Importante exemplar da arquitetura histórica do município.",
+
+        "descricao": "O Sobrado Barão do Cabo Verde faz parte do conjunto arquitetônico histórico de Andrelândia e representa o período de desenvolvimento econômico da região.",
+
+        "historia": "Construído durante o período de expansão urbana da cidade, o imóvel preserva características marcantes da arquitetura colonial mineira.",
+
+        "curiosidades": "Sua fachada é considerada uma das mais elegantes entre os casarões históricos de Andrelândia.",
+
+        "tempoVisita": "15 a 30 minutos",
+
+        "foto": "img/locais/sobrado-barao/capa.webp",
+
+        "galeria": [
+            "img/locais/sobrado-barao/1.webp",
+            "img/locais/sobrado-barao/2.webp",
+            "img/locais/sobrado-barao/3.webp"
+        ]
+    },
+
+    {
+        "id": "sobrado-pinheiros",
+
+        "nome": "Sobrado dos Pinheiros",
+
+        "categoria": "Patrimônio Histórico",
+
+        "icone": "casarao.svg",
+
+        "latitude": -21.742850,
+
+        "longitude": -44.309180,
+
+        "endereco": "Centro, Andrelândia - MG",
+
+        "descricaoCurta": "Casarão histórico que integra o patrimônio arquitetônico de Andrelândia.",
+
+        "descricao": "O Sobrado dos Pinheiros preserva características tradicionais da arquitetura colonial e contribui para a identidade histórica do centro urbano.",
+
+        "historia": "Ao longo dos anos, o imóvel tornou-se uma referência entre as construções históricas do município.",
+
+        "curiosidades": "É frequentemente lembrado pelos detalhes de sua fachada e por sua importância para a preservação do conjunto arquitetônico local.",
+
+        "tempoVisita": "15 a 30 minutos",
+
+        "foto": "img/locais/sobrado-pinheiros/capa.webp",
+
+        "galeria": [
+            "img/locais/sobrado-pinheiros/1.webp",
+            "img/locais/sobrado-pinheiros/2.webp",
+            "img/locais/sobrado-pinheiros/3.webp"
+        ]
+    }
+]
