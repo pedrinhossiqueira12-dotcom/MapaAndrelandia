@@ -1,0 +1,1018 @@
+/*
+=========================================================
+LOCAL
+local.css
+Versão 1.0
+=========================================================
+*/
+
+html,
+body{
+
+    margin:0;
+
+    padding:0;
+
+    width:100%;
+
+    min-height:100%;
+
+}
+
+body.pagina-local{
+
+    background:#d9c6a0;
+
+    background-image:url("../img/interface/papel-local.webp");
+
+    background-repeat:no-repeat;
+
+    background-size:100% 100%;
+
+    background-attachment:fixed;
+
+    color:#3d2a16;
+
+    font-family:inherit;
+
+    overflow-x:hidden;
+
+}
+
+/*
+=========================================================
+HERO
+=========================================================
+*/
+
+#hero{
+
+    position:relative;
+
+    width:100%;
+
+    height:42vh;
+
+    min-height:280px;
+
+    max-height:500px;
+
+    overflow:hidden;
+
+}
+
+#heroImagem{
+
+    width:100%;
+
+    height:100%;
+
+    object-fit:cover;
+
+    display:block;
+
+}
+
+#heroGradient{
+
+    position:absolute;
+
+    inset:0;
+
+    background:
+
+    linear-gradient(
+
+        to top,
+
+        rgba(0,0,0,.70),
+
+        rgba(0,0,0,.15),
+
+        rgba(0,0,0,.35)
+
+    );
+
+}
+
+/*
+=========================================================
+BOTÕES HERO
+=========================================================
+*/
+
+.heroButton{
+
+    position:absolute;
+
+    top:20px;
+
+    width:48px;
+
+    height:48px;
+
+    border:none;
+
+    border-radius:50%;
+
+    background:rgba(255,255,255,.18);
+
+    backdrop-filter:blur(8px);
+
+    color:#fff;
+
+    font-size:22px;
+
+    cursor:pointer;
+
+    transition:.25s;
+
+    z-index:20;
+
+}
+
+.heroButton:hover{
+
+    transform:scale(1.08);
+
+}
+
+#btnVoltar{
+
+    left:18px;
+
+}
+
+#btnCompartilhar{
+
+    right:18px;
+
+}
+
+/*
+=========================================================
+CONTEÚDO
+=========================================================
+*/
+
+#conteudo{
+
+    max-width:900px;
+
+    margin:auto;
+
+    padding:30px 20px 140px;
+
+}
+
+/*
+=========================================================
+CABEÇALHO
+=========================================================
+*/
+
+#categoria{
+
+    display:inline-block;
+
+    padding:6px 14px;
+
+    border-radius:50px;
+
+    background:#7a5a31;
+
+    color:#fff;
+
+    font-size:.82rem;
+
+    margin-bottom:14px;
+
+}
+
+#titulo{
+
+    margin:0;
+
+    font-size:2rem;
+
+    color:#2d1c0e;
+
+}
+
+#nota{
+
+    display:block;
+
+    margin-top:10px;
+
+    color:#6a4a25;
+
+    font-weight:bold;
+
+}
+
+/*
+=========================================================
+CARDS
+=========================================================
+*/
+
+.card{
+
+    margin-top:26px;
+
+    padding:22px;
+
+    border-radius:18px;
+
+    background:rgba(255,250,240,.58);
+
+    backdrop-filter:blur(2px);
+
+    box-shadow:
+
+    0 4px 14px rgba(0,0,0,.10);
+
+}
+
+.card h2{
+
+    margin-top:0;
+
+    color:#5e4426;
+
+}
+
+.card p{
+
+    line-height:1.8;
+
+    text-align:justify;
+
+}
+/*
+=========================================================
+INFORMAÇÕES
+=========================================================
+*/
+
+.infoLinha{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:flex-start;
+
+    gap:20px;
+
+    padding:12px 0;
+
+    border-bottom:1px solid rgba(0,0,0,.08);
+
+}
+
+.infoLinha:last-child{
+
+    border-bottom:none;
+
+}
+
+.infoLinha strong{
+
+    color:#5e4426;
+
+    flex-shrink:0;
+
+}
+
+.infoLinha span{
+
+    text-align:right;
+
+}
+
+/*
+=========================================================
+GALERIA
+=========================================================
+*/
+
+#galeria{
+
+    display:grid;
+
+    grid-template-columns:repeat(auto-fill,minmax(130px,1fr));
+
+    gap:12px;
+
+    margin-top:15px;
+
+}
+
+#galeria img{
+
+    width:100%;
+
+    aspect-ratio:1;
+
+    object-fit:cover;
+
+    border-radius:12px;
+
+    cursor:pointer;
+
+    transition:.25s;
+
+    box-shadow:0 2px 8px rgba(0,0,0,.15);
+
+}
+
+#galeria img:hover{
+
+    transform:scale(1.05);
+
+}
+
+/*
+=========================================================
+MAPA
+=========================================================
+*/
+
+#mapaLocal{
+
+    width:100%;
+
+    height:320px;
+
+    border-radius:16px;
+
+    overflow:hidden;
+
+    margin-top:15px;
+
+    box-shadow:0 4px 14px rgba(0,0,0,.15);
+
+}
+
+/*
+=========================================================
+RODAPÉ
+=========================================================
+*/
+
+#acoes{
+
+    position:fixed;
+
+    left:0;
+
+    right:0;
+
+    bottom:0;
+
+    padding:18px;
+
+    padding-bottom:calc(18px + env(safe-area-inset-bottom));
+
+    background:rgba(245,235,214,.92);
+
+    backdrop-filter:blur(10px);
+
+    border-top:1px solid rgba(0,0,0,.08);
+
+    z-index:1000;
+
+}
+
+#btnComoChegar{
+
+    width:100%;
+
+    height:56px;
+
+    border:none;
+
+    border-radius:16px;
+
+    background:#6b4a23;
+
+    color:#fff;
+
+    font-size:1rem;
+
+    font-weight:600;
+
+    cursor:pointer;
+
+    transition:.25s;
+
+}
+
+#btnComoChegar:hover{
+
+    transform:scale(1.02);
+
+    background:#7a5429;
+
+}
+
+/*
+=========================================================
+LIGHTBOX
+=========================================================
+*/
+
+#lightbox{
+
+    position:fixed;
+
+    inset:0;
+
+    background:rgba(0,0,0,.92);
+
+    display:none;
+
+    justify-content:center;
+
+    align-items:center;
+
+    z-index:9999;
+
+    padding:20px;
+
+}
+
+#lightbox.open{
+
+    display:flex;
+
+}
+
+#lightboxImagem{
+
+    max-width:100%;
+
+    max-height:90vh;
+
+    border-radius:12px;
+
+    box-shadow:0 10px 40px rgba(0,0,0,.45);
+
+}
+
+/*
+=========================================================
+RESPONSIVO
+=========================================================
+*/
+
+@media(max-width:768px){
+
+    #hero{
+
+        height:34vh;
+
+    }
+
+    #titulo{
+
+        font-size:1.7rem;
+
+    }
+
+    .card{
+
+        padding:18px;
+
+    }
+
+    #mapaLocal{
+
+        height:260px;
+
+    }
+
+}
+/*
+=========================================================
+LOCAL
+local.js
+Versão 1.0
+=========================================================
+*/
+
+/*
+=========================================================
+VARIÁVEIS
+=========================================================
+*/
+
+let localAtual = null;
+
+let mapaLocal = null;
+
+let marcadorLocal = null;
+
+/*
+=========================================================
+ELEMENTOS
+=========================================================
+*/
+
+const heroImagem = document.getElementById("heroImagem");
+
+const categoria = document.getElementById("categoria");
+
+const titulo = document.getElementById("titulo");
+
+const nota = document.getElementById("nota");
+
+const historia = document.getElementById("historia");
+
+const curiosidades = document.getElementById("curiosidades");
+
+const endereco = document.getElementById("endereco");
+
+const tempo = document.getElementById("tempo");
+
+const galeria = document.getElementById("galeria");
+
+const btnVoltar = document.getElementById("btnVoltar");
+
+const btnCompartilhar = document.getElementById("btnCompartilhar");
+
+const btnComoChegar = document.getElementById("btnComoChegar");
+
+const lightbox = document.getElementById("lightbox");
+
+const lightboxImagem = document.getElementById("lightboxImagem");
+
+/*
+=========================================================
+INICIAR
+=========================================================
+*/
+
+document.addEventListener(
+
+    "DOMContentLoaded",
+
+    iniciarPaginaLocal
+
+);
+
+function iniciarPaginaLocal(){
+
+    localizarItem();
+
+    configurarEventos();
+
+}
+
+/*
+=========================================================
+OBTER ID
+=========================================================
+*/
+
+function obterID(){
+
+    const parametros = new URLSearchParams(
+
+        window.location.search
+
+    );
+
+    return parametros.get("id");
+
+}
+
+/*
+=========================================================
+LOCALIZAR ITEM
+=========================================================
+*/
+
+function localizarItem(){
+
+    const id = obterID();
+
+    if(!id){
+
+        paginaNaoEncontrada();
+
+        return;
+
+    }
+
+    localAtual = locais.find(
+
+        item => item.id === id
+
+    );
+
+    if(!localAtual){
+
+        paginaNaoEncontrada();
+
+        return;
+
+    }
+
+    preencherPagina();
+
+    iniciarMapa();
+
+    }
+  /*
+=========================================================
+PREENCHER PÁGINA
+=========================================================
+*/
+
+function preencherPagina(){
+
+    document.title = localAtual.nome;
+
+    heroImagem.src =
+        localAtual.foto ||
+        "../img/interface/sem-foto.webp";
+
+    categoria.textContent =
+        localAtual.categoria || "";
+
+    titulo.textContent =
+        localAtual.nome || "";
+
+    nota.textContent =
+        localAtual.nota
+            ? "★ " + localAtual.nota
+            : "";
+
+    historia.textContent =
+        localAtual.historia ||
+        localAtual.descricao ||
+        "";
+
+    curiosidades.textContent =
+        localAtual.curiosidades ||
+        "Nenhuma curiosidade cadastrada.";
+
+    endereco.textContent =
+        localAtual.endereco ||
+        "Não informado.";
+
+    tempo.textContent =
+        localAtual.tempoVisita ||
+        "Não informado.";
+
+    carregarGaleria();
+
+}
+
+/*
+=========================================================
+GALERIA
+=========================================================
+*/
+
+function carregarGaleria(){
+
+    galeria.innerHTML = "";
+
+    if(
+        !localAtual.fotos ||
+        !localAtual.fotos.length
+    ){
+
+        return;
+
+    }
+
+    localAtual.fotos.forEach(
+
+        foto=>{
+
+            const img =
+                document.createElement("img");
+
+            img.loading = "lazy";
+
+            img.src = foto;
+
+            img.alt = localAtual.nome;
+
+            img.addEventListener(
+
+                "click",
+
+                ()=>{
+
+                    abrirLightbox(foto);
+
+                }
+
+            );
+
+            galeria.appendChild(img);
+
+        }
+
+    );
+
+}
+
+/*
+=========================================================
+MAPA
+=========================================================
+*/
+
+function iniciarMapa(){
+
+    mapaLocal = L.map(
+
+        "mapaLocal",
+
+        {
+
+            zoomControl:false,
+
+            attributionControl:false
+
+        }
+
+    );
+
+    L.tileLayer(
+
+        "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+
+        {
+
+            maxZoom:20
+
+        }
+
+    ).addTo(mapaLocal);
+
+    marcadorLocal = L.marker(
+
+        [
+
+            localAtual.latitude,
+
+            localAtual.longitude
+
+        ]
+
+    ).addTo(mapaLocal);
+
+    mapaLocal.setView(
+
+        [
+
+            localAtual.latitude,
+
+            localAtual.longitude
+
+        ],
+
+        18
+
+    );
+
+  }
+  /*
+=========================================================
+EVENTOS
+=========================================================
+*/
+
+function configurarEventos(){
+
+    btnVoltar.addEventListener(
+
+        "click",
+
+        ()=>{
+
+            history.back();
+
+        }
+
+    );
+
+    btnCompartilhar.addEventListener(
+
+        "click",
+
+        compartilharLocal
+
+    );
+
+    btnComoChegar.addEventListener(
+
+        "click",
+
+        abrirRota
+
+    );
+
+    lightbox.addEventListener(
+
+        "click",
+
+        fecharLightbox
+
+    );
+
+}
+
+/*
+=========================================================
+COMPARTILHAR
+=========================================================
+*/
+
+async function compartilharLocal(){
+
+    const url = window.location.href;
+
+    if(navigator.share){
+
+        try{
+
+            await navigator.share({
+
+                title:localAtual.nome,
+
+                text:localAtual.descricao || "",
+
+                url:url
+
+            });
+
+            return;
+
+        }catch(e){}
+
+    }
+
+    try{
+
+        await navigator.clipboard.writeText(
+
+            url
+
+        );
+
+        alert(
+
+            "Link copiado para a área de transferência."
+
+        );
+
+    }catch(e){
+
+        prompt(
+
+            "Copie o link:",
+
+            url
+
+        );
+
+    }
+
+}
+
+/*
+=========================================================
+COMO CHEGAR
+=========================================================
+*/
+
+function abrirRota(){
+
+    window.open(
+
+        "https://www.google.com/maps/dir/?api=1&destination=" +
+
+        localAtual.latitude +
+
+        "," +
+
+        localAtual.longitude,
+
+        "_blank"
+
+    );
+
+}
+
+/*
+=========================================================
+LIGHTBOX
+=========================================================
+*/
+
+function abrirLightbox(imagem){
+
+    lightboxImagem.src = imagem;
+
+    lightbox.classList.add(
+
+        "open"
+
+    );
+
+}
+
+function fecharLightbox(){
+
+    lightbox.classList.remove(
+
+        "open"
+
+    );
+
+    lightboxImagem.src = "";
+
+}
+
+/*
+=========================================================
+PÁGINA NÃO ENCONTRADA
+=========================================================
+*/
+
+function paginaNaoEncontrada(){
+
+    document.body.innerHTML = `
+
+        <main
+        style="
+        display:flex;
+        flex-direction:column;
+        justify-content:center;
+        align-items:center;
+        height:100vh;
+        text-align:center;
+        padding:30px;
+        ">
+
+            <h1>
+
+                Local não encontrado
+
+            </h1>
+
+            <p>
+
+                O ponto turístico solicitado não existe.
+
+            </p>
+
+            <button
+            onclick="history.back()">
+
+                Voltar
+
+            </button>
+
+        </main>
+
+    `;
+
+}
+
+/*
+=========================================================
+ESC
+=========================================================
+*/
+
+document.addEventListener(
+
+    "keydown",
+
+    e=>{
+
+        if(e.key==="Escape"){
+
+            fecharLightbox();
+
+        }
+
+    }
+
+);
+
+/*
+=========================================================
+FIM
+=========================================================
+*/
