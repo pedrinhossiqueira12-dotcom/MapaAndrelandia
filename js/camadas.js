@@ -2,21 +2,9 @@
 =========================================================
 MAPA INTERATIVO DE ANDRELÂNDIA
 camadas.js
-Versão 2.0
+Versão 3.0
 =========================================================
 */
-
-/*
-=========================================================
-MODOS
-=========================================================
-*/
-
-const MODO_PERGAMINHO = "pergaminho";
-
-const MODO_SATELITE = "satelite";
-
-let modoMapa = MODO_PERGAMINHO;
 
 /*
 =========================================================
@@ -26,228 +14,55 @@ INICIAR
 
 function iniciarCamadas(){
 
-    atualizarModoMapa();
+    const botao = document.getElementById(
 
-    if(btnSatellite){
+        "btnSatellite"
 
-        btnSatellite.addEventListener(
+    );
 
-            "click",
-
-            alternarModoMapa
-
-        );
-
-    }
-
-}
-
-/*
-=========================================================
-ALTERNAR
-=========================================================
-*/
-
-function alternarModoMapa(){
-
-    modoMapa =
-
-        modoMapa===MODO_PERGAMINHO
-
-        ? MODO_SATELITE
-
-        : MODO_PERGAMINHO;
-
-    atualizarModoMapa();
-
-}
-
-/*
-=========================================================
-ATUALIZAR
-=========================================================
-*/
-
-function atualizarModoMapa(){
-
-    if(!mapa){
+    if(!botao){
 
         return;
 
     }
 
-    if(modoMapa===MODO_PERGAMINHO){
+    botao.addEventListener(
 
-        ativarPergaminho();
+        "click",
 
-    }else{
+        ()=>{
 
-        ativarSatelite();
+            alternarModoMapa();
 
-    }
+        }
+
+    );
 
 }
 
 /*
 =========================================================
-PERGAMINHO
-=========================================================
-*/
-
-function ativarPergaminho(){
-
-    document.body.classList.add(
-
-        "modo-pergaminho"
-
-    );
-
-    document.body.classList.remove(
-
-        "modo-satelite"
-
-    );
-
-    if(camadaSatelite){
-
-        mapa.removeLayer(
-
-            camadaSatelite
-
-        );
-
-    }
-
-    mostrarSVGMapa();
-
-    if(typeof atualizarTextura==="function"){
-
-        atualizarTextura();
-
-    }
-
-    if(btnSatellite){
-
-        btnSatellite.title = "Modo Satélite";
-
-    }
-
-}
-
-/*
-=========================================================
-SATÉLITE
-=========================================================
-*/
-
-function ativarSatelite(){
-
-    document.body.classList.remove(
-
-        "modo-pergaminho"
-
-    );
-
-    document.body.classList.add(
-
-        "modo-satelite"
-
-    );
-
-    if(camadaSatelite){
-
-        camadaSatelite.addTo(
-
-            mapa
-
-        );
-
-    }
-
-    ocultarSVGMapa();
-
-    if(btnSatellite){
-
-        btnSatellite.title = "Modo Pergaminho";
-
-    }
-
-}
-
-/*
-=========================================================
-SVG
+MOSTRAR SVG
 =========================================================
 */
 
 function mostrarSVGMapa(){
 
-    if(!camadasSVG){
-
-        return;
-
-    }
-
-    camadasSVG.forEach(
-
-        camada=>{
-
-            if(
-
-                camada &&
-
-                !mapa.hasLayer(camada)
-
-            ){
-
-                camada.addTo(
-
-                    mapa
-
-                );
-
-            }
-
-        }
-
-    );
+    mostrarSVGs();
 
 }
+
+/*
+=========================================================
+OCULTAR SVG
+=========================================================
+*/
 
 function ocultarSVGMapa(){
 
-    if(!camadasSVG){
-
-        return;
-
-    }
-
-    camadasSVG.forEach(
-
-        camada=>{
-
-            if(
-
-                camada &&
-
-                mapa.hasLayer(camada)
-
-            ){
-
-                mapa.removeLayer(
-
-                    camada
-
-                );
-
-            }
-
-        }
-
-    );
+    esconderSVGs();
 
 }
-
 /*
 =========================================================
 UTILITÁRIOS
@@ -256,12 +71,106 @@ UTILITÁRIOS
 
 function mapaEstaEmPergaminho(){
 
-    return modoMapa===MODO_PERGAMINHO;
+    return mapaIlustrado === true;
 
 }
 
 function mapaEstaEmSatelite(){
 
-    return modoMapa===MODO_SATELITE;
+    return mapaIlustrado === false;
 
 }
+
+function obterModoMapa(){
+
+    return mapaIlustrado
+
+        ? "pergaminho"
+
+        : "satelite";
+
+}
+
+/*
+=========================================================
+DEFINIR MODO
+=========================================================
+*/
+
+function definirModo(modo){
+
+    if(
+
+        modo !== "pergaminho" &&
+
+        modo !== "satelite"
+
+    ){
+
+        return;
+
+    }
+
+    definirModoMapa(
+
+        modo === "pergaminho"
+
+    );
+
+}
+
+/*
+=========================================================
+ATUALIZAR BOTÃO
+=========================================================
+*/
+
+function atualizarBotaoCamadas(){
+
+    const botao = document.getElementById(
+
+        "btnSatellite"
+
+    );
+
+    if(!botao){
+
+        return;
+
+    }
+
+    botao.title = mapaEstaEmPergaminho()
+
+        ? "Modo Satélite"
+
+        : "Modo Pergaminho";
+
+}
+
+/*
+=========================================================
+API
+=========================================================
+*/
+
+window.camadasAPI = {
+
+    mostrarSVGMapa,
+
+    ocultarSVGMapa,
+
+    mapaEstaEmPergaminho,
+
+    mapaEstaEmSatelite,
+
+    obterModoMapa,
+
+    definirModo
+
+};
+
+/*
+=========================================================
+FIM
+=========================================================
+*/
