@@ -2,41 +2,37 @@
 =========================================================
 MAPA INTERATIVO DE ANDRELÂNDIA
 util.js
-Versão 1.0
+Versão 2.0
 =========================================================
 */
 
 /*
 =========================================================
-VERIFICAR VALOR
+DEBUG
+=========================================================
+*/
+
+const DEBUG =
+
+    location.hostname === "localhost";
+
+/*
+=========================================================
+EXISTE
 =========================================================
 */
 
 function existe(valor){
 
-    return valor!==undefined &&
-           valor!==null &&
-           valor!=="";
+    return (
 
-}
+        valor !== undefined &&
 
-/*
-=========================================================
-COORDENADAS
-=========================================================
-*/
+        valor !== null &&
 
-function coordenadasValidas(lat,lng){
+        valor !== ""
 
-    if(typeof lat!=="number") return false;
-
-    if(typeof lng!=="number") return false;
-
-    if(lat<-90 || lat>90) return false;
-
-    if(lng<-180 || lng>180) return false;
-
-    return true;
+    );
 
 }
 
@@ -75,19 +71,59 @@ function numero(valor){
         : 0;
 
 }
+
+/*
+=========================================================
+COORDENADAS
+=========================================================
+*/
+
+function coordenadasValidas(
+
+    latitude,
+
+    longitude
+
+){
+
+    latitude = numero(latitude);
+
+    longitude = numero(longitude);
+
+    return (
+
+        latitude >= -90 &&
+
+        latitude <= 90 &&
+
+        longitude >= -180 &&
+
+        longitude <= 180
+
+    );
+
+}
 /*
 =========================================================
 ESCAPAR HTML
 =========================================================
 */
 
-function escaparHTML(texto){
+function escaparHTML(textoOriginal){
 
-    const div=document.createElement("div");
+    const elemento = document.createElement(
 
-    div.textContent=texto;
+        "div"
 
-    return div.innerHTML;
+    );
+
+    elemento.textContent = texto(
+
+        textoOriginal
+
+    );
+
+    return elemento.innerHTML;
 
 }
 
@@ -97,27 +133,37 @@ CAPITALIZAR
 =========================================================
 */
 
-function capitalizar(texto){
+function capitalizar(textoOriginal){
 
-    texto = String(texto || "").trim();
+    return texto(textoOriginal)
 
-    if(!texto){
-
-        return "";
-
-    }
-
-    return texto
-
-        .split(" ")
+        .split(/\s+/)
 
         .map(
 
-            palavra=>
+            palavra=>{
 
-                palavra.charAt(0).toUpperCase() +
+                if(
 
-                palavra.slice(1)
+                    palavra.length <= 2 ||
+
+                    /^[A-Z0-9-]+$/.test(palavra)
+
+                ){
+
+                    return palavra.toUpperCase();
+
+                }
+
+                return (
+
+                    palavra.charAt(0).toUpperCase() +
+
+                    palavra.slice(1).toLowerCase()
+
+                );
+
+            }
 
         )
 
@@ -143,7 +189,13 @@ function distancia(
 
 ){
 
-    if(!mapa){
+    if(
+
+        typeof mapa === "undefined" ||
+
+        !mapa
+
+    ){
 
         return 0;
 
@@ -151,13 +203,26 @@ function distancia(
 
     return mapa.distance(
 
-        [lat1,lng1],
+        [
 
-        [lat2,lng2]
+            numero(lat1),
+
+            numero(lng1)
+
+        ],
+
+        [
+
+            numero(lat2),
+
+            numero(lng2)
+
+        ]
 
     );
 
 }
+
 /*
 =========================================================
 FORMATAR DISTÂNCIA
@@ -166,41 +231,47 @@ FORMATAR DISTÂNCIA
 
 function formatarDistancia(valor){
 
-    if(valor<1000){
+    valor = numero(valor);
 
-        return Math.round(valor)+" m";
+    if(valor < 1000){
+
+        return Math.round(valor) + " m";
 
     }
 
-    return (valor/1000)
+    return (
 
-        .toFixed(1)
+        valor / 1000
 
-        .replace(".",",")
+    )
 
-        +" km";
+    .toFixed(1)
+
+    .replace(".",",")
+
+    + " km";
 
 }
 
 /*
 =========================================================
-ID ÚNICO
+GERAR ID
 =========================================================
 */
 
 function gerarID(){
 
-    return Date.now()
+    return (
 
-        .toString(36)
-
-        +
+        Date.now().toString(36) +
 
         Math.random()
 
         .toString(36)
 
-        .substring(2,8);
+        .substring(2,10)
+
+    );
 
 }
 
@@ -209,8 +280,6 @@ function gerarID(){
 LOG
 =========================================================
 */
-
-const DEBUG = false;
 
 function log(){
 
@@ -229,3 +298,39 @@ function log(){
     );
 
 }
+
+/*
+=========================================================
+API
+=========================================================
+*/
+
+window.utilAPI = {
+
+    existe,
+
+    texto,
+
+    numero,
+
+    coordenadasValidas,
+
+    escaparHTML,
+
+    capitalizar,
+
+    distancia,
+
+    formatarDistancia,
+
+    gerarID,
+
+    log
+
+};
+
+/*
+=========================================================
+FIM
+=========================================================
+*/
