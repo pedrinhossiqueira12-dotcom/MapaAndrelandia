@@ -2,7 +2,7 @@
 =========================================================
 MAPA INTERATIVO DE ANDRELÂNDIA
 gps.js
-Versão 2.0
+Versão 3.0
 =========================================================
 */
 
@@ -26,15 +26,41 @@ INICIAR
 
 function iniciarGPS(){
 
-    if(!navigator.geolocation){
+    if(
 
-        console.warn("Geolocalização não suportada.");
+        !navigator.geolocation ||
+
+        !mapa
+
+    ){
 
         return;
 
     }
 
-    if(watchID !== null){
+    const botao = document.getElementById(
+
+        "btnGPS"
+
+    );
+
+    if(botao){
+
+        botao.addEventListener(
+
+            "click",
+
+            centralizarUsuario
+
+        );
+
+    }
+
+    if(
+
+        watchID !== null
+
+    ){
 
         return;
 
@@ -50,9 +76,9 @@ function iniciarGPS(){
 
             enableHighAccuracy:true,
 
-            maximumAge:3000,
+            timeout:10000,
 
-            timeout:10000
+            maximumAge:3000
 
         }
 
@@ -68,11 +94,17 @@ ATUALIZAR LOCALIZAÇÃO
 
 function atualizarLocalizacao(posicao){
 
-    const latitude = posicao.coords.latitude;
+    const latitude =
 
-    const longitude = posicao.coords.longitude;
+        posicao.coords.latitude;
 
-    const precisao = posicao.coords.accuracy;
+    const longitude =
+
+        posicao.coords.longitude;
+
+    const precisao =
+
+        posicao.coords.accuracy;
 
     ultimaLocalizacao = [
 
@@ -92,13 +124,23 @@ function atualizarLocalizacao(posicao){
 
     );
 
-    if(acompanhandoGPS){
+    if(
+
+        acompanhandoGPS
+
+    ){
 
         mapa.flyTo(
 
             ultimaLocalizacao,
 
-            mapa.getZoom(),
+            Math.max(
+
+                mapa.getZoom(),
+
+                18
+
+            ),
 
             {
 
@@ -113,10 +155,9 @@ function atualizarLocalizacao(posicao){
     }
 
 }
-
 /*
 =========================================================
-MARCADOR
+MARCADOR DO USUÁRIO
 =========================================================
 */
 
@@ -129,6 +170,12 @@ function atualizarMarcadorUsuario(
     precisao
 
 ){
+
+    if(!mapa){
+
+        return;
+
+    }
 
     const posicao = [
 
@@ -158,7 +205,11 @@ function atualizarMarcadorUsuario(
 
             }
 
-        ).addTo(mapa);
+        ).addTo(
+
+            mapa
+
+        );
 
     }else{
 
@@ -190,7 +241,11 @@ function atualizarMarcadorUsuario(
 
             }
 
-        ).addTo(mapa);
+        ).addTo(
+
+            mapa
+
+        );
 
     }else{
 
@@ -212,13 +267,19 @@ function atualizarMarcadorUsuario(
 
 /*
 =========================================================
-CENTRALIZAR
+CENTRALIZAR USUÁRIO
 =========================================================
 */
 
 function centralizarUsuario(){
 
-    if(!ultimaLocalizacao){
+    if(
+
+        !ultimaLocalizacao ||
+
+        !mapa
+
+    ){
 
         return;
 
@@ -261,10 +322,9 @@ function pararAcompanhamentoGPS(){
     acompanhandoGPS = false;
 
 }
-
 /*
 =========================================================
-FINALIZAR GPS
+DESLIGAR GPS
 =========================================================
 */
 
@@ -272,7 +332,11 @@ function desligarGPS(){
 
     acompanhandoGPS = false;
 
-    if(watchID !== null){
+    if(
+
+        watchID !== null
+
+    ){
 
         navigator.geolocation.clearWatch(
 
@@ -283,6 +347,40 @@ function desligarGPS(){
         watchID = null;
 
     }
+
+    if(
+
+        marcadorUsuario
+
+    ){
+
+        mapa.removeLayer(
+
+            marcadorUsuario
+
+        );
+
+        marcadorUsuario = null;
+
+    }
+
+    if(
+
+        circuloPrecisao
+
+    ){
+
+        mapa.removeLayer(
+
+            circuloPrecisao
+
+        );
+
+        circuloPrecisao = null;
+
+    }
+
+    ultimaLocalizacao = null;
 
 }
 
@@ -296,7 +394,7 @@ function erroLocalizacao(erro){
 
     console.warn(
 
-        "Erro ao obter localização:",
+        "Erro de geolocalização:",
 
         erro.message
 
@@ -321,3 +419,37 @@ function possuiLocalizacao(){
     return ultimaLocalizacao !== null;
 
 }
+
+function obterLocalizacaoAtual(){
+
+    return ultimaLocalizacao;
+
+}
+
+/*
+=========================================================
+API
+=========================================================
+*/
+
+window.gpsAPI = {
+
+    centralizarUsuario,
+
+    pararAcompanhamentoGPS,
+
+    desligarGPS,
+
+    gpsAtivo,
+
+    possuiLocalizacao,
+
+    obterLocalizacaoAtual
+
+};
+
+/*
+=========================================================
+FIM
+=========================================================
+*/
