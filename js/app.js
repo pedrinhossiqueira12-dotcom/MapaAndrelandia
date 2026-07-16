@@ -184,8 +184,6 @@ function obterElementos(){
 
     btnLocate = document.getElementById("btnGPS");
 
-    btnLayers = null;
-
     btnSatellite = document.getElementById("btnSatellite");
 
     btnCloseSidebar = document.getElementById("fecharMenu");
@@ -220,7 +218,7 @@ async function carregarDados(){
 
     }catch(e){
 
-        console.warn("Erro ao carregar locais.json");
+        console.warn("Erro ao carregar locais.json", e);
 
     }
 
@@ -344,7 +342,13 @@ function fecharPesquisa(){
 
     if(searchInput){
 
-        searchInput.value="";
+        searchInput.value = "";
+
+    }
+
+    if(typeof limparResultados === "function"){
+
+        limparResultados();
 
     }
 
