@@ -2,7 +2,7 @@
 =========================================================
 MAPA INTERATIVO DE ANDRELÂNDIA
 marcadores.js
-Versão 3.0
+Versão 4.0
 =========================================================
 */
 
@@ -12,9 +12,9 @@ VARIÁVEIS
 =========================================================
 */
 
-let marcadorSelecionado = null;
-
 let grupoMarcadores = null;
+
+let marcadorSelecionado = null;
 
 /*
 =========================================================
@@ -26,19 +26,15 @@ function iniciarMarcadores(){
 
     grupoMarcadores = L.layerGroup();
 
-    grupoMarcadores.addTo(mapa);
+    grupoMarcadores.addTo(
+
+        mapa
+
+    );
 
     criarMarcadoresLocais();
 
     criarMarcadoresComercios();
-
-    mapa.on(
-
-        "zoomend",
-
-        atualizarZoomMarcadores
-
-    );
 
     atualizarZoomMarcadores();
 
@@ -46,7 +42,7 @@ function iniciarMarcadores(){
 
 /*
 =========================================================
-LOCAIS
+CRIAR TODOS
 =========================================================
 */
 
@@ -69,12 +65,6 @@ function criarMarcadoresLocais(){
     );
 
 }
-
-/*
-=========================================================
-COMÉRCIOS
-=========================================================
-*/
 
 function criarMarcadoresComercios(){
 
@@ -109,6 +99,22 @@ function criarMarcador(
     tipo
 
 ){
+
+    if(
+
+        !coordenadasValidas(
+
+            dados.latitude,
+
+            dados.longitude
+
+        )
+
+    ){
+
+        return;
+
+    }
 
     const marcador = L.marker(
 
@@ -165,27 +171,34 @@ function criarMarcador(
     );
 
 }
+
 /*
 =========================================================
-ÍCONE PERSONALIZADO
+ÍCONE
 =========================================================
 */
 
 function criarIcone(dados){
 
-    const icone =
+    const arquivo =
 
-    dados.icone
+        dados.icone
 
-        ? CONFIG.caminhos.icones + dados.icone
+            ? dados.icone
 
-        : CONFIG.caminhos.icones + "padrao.svg";
+            : "padrao.svg";
 
     return L.divIcon(
 
         {
 
             className:"marker-wrapper",
+
+            iconSize:[44,56],
+
+            iconAnchor:[22,50],
+
+            popupAnchor:[0,-42],
 
             html:`
 
@@ -197,9 +210,9 @@ function criarIcone(dados){
 
                         <img
 
-                            src="${icone}"
+                            src="${CONFIG.caminhos.icones}${arquivo}"
 
-                            alt="${dados.nome}"
+                            alt="${escaparHTML(dados.nome)}"
 
                             draggable="false">
 
@@ -207,23 +220,16 @@ function criarIcone(dados){
 
                 </div>
 
-            `,
-
-            iconSize:[44,56],
-
-            iconAnchor:[22,50],
-
-            popupAnchor:[0,-42]
+            `
 
         }
 
     );
 
 }
-
 /*
 =========================================================
-SELECIONAR
+SELECIONAR MARCADOR
 =========================================================
 */
 
@@ -237,14 +243,29 @@ function selecionarMarcador(marcador){
 
     if(elemento){
 
-        const marker = elemento.querySelector(".marker");
+        const marker = elemento.querySelector(
 
-if(marker){
+            ".marker"
 
-    marker.classList.add("marker-selecionado");
+        );
 
-}
+        if(marker){
+
+            marker.classList.add(
+
+                "marker-selecionado"
+
+            );
+
+        }
+
     }
+
+    destacarMarcador(
+
+        marcador
+
+    );
 
     centralizarMapa(
 
@@ -288,22 +309,75 @@ function limparMarcadorSelecionado(){
 
     if(elemento){
 
-        const marker = elemento.querySelector(".marker");
+        const marker = elemento.querySelector(
 
-if(marker){
+            ".marker"
 
-    marker.classList.add("marker-selecionado");
+        );
 
-}
+        if(marker){
+
+            marker.classList.remove(
+
+                "marker-selecionado"
+
+            );
+
+        }
 
     }
 
     marcadorSelecionado = null;
 
 }
+
 /*
 =========================================================
-OBTER MARCADOR PELO ID
+DESTACAR
+=========================================================
+*/
+
+function destacarMarcador(marcador){
+
+    const elemento = marcador.getElement();
+
+    if(!elemento){
+
+        return;
+
+    }
+
+    const marker = elemento.querySelector(
+
+        ".marker"
+
+    );
+
+    if(!marker){
+
+        return;
+
+    }
+
+    marker.classList.remove(
+
+        "marker-animando"
+
+    );
+
+    void marker.offsetWidth;
+
+    marker.classList.add(
+
+        "marker-animando"
+
+    );
+
+}
+
+/*
+=========================================================
+OBTER MARCADOR
 =========================================================
 */
 
@@ -311,11 +385,9 @@ function obterMarcador(id){
 
     return marcadores.find(
 
-        marcador=>{
+        marcador=>
 
-            return marcador.dados.id===id;
-
-        }
+            marcador.dados.id===id
 
     ) || null;
 
@@ -323,7 +395,7 @@ function obterMarcador(id){
 
 /*
 =========================================================
-SELECIONAR PELO ID
+ABRIR PELO ID
 =========================================================
 */
 
@@ -337,48 +409,63 @@ function selecionarMarcadorPorId(id){
 
     }
 
-    selecionarMarcador(marcador);
+    selecionarMarcador(
 
-}
-
-/*
-=========================================================
-FILTRO POR CATEGORIA
-=========================================================
-*/
-
-function atualizarMarcadoresCategorias(categorias){
-
-    marcadores.forEach(
-
-        marcador=>{
-
-            const categoria = marcador.dados.categoria;
-
-            if(categorias.includes(categoria)){
-
-                if(!grupoMarcadores.hasLayer(marcador)){
-
-                    grupoMarcadores.addLayer(marcador);
-
-                }
-
-            }else{
-
-                if(grupoMarcadores.hasLayer(marcador)){
-
-                    grupoMarcadores.removeLayer(marcador);
-
-                }
-
-            }
-
-        }
+        marcador
 
     );
 
 }
 
+/*
+=========================================================
+PESQUISA
+=========================================================
+*/
+
+function selecionarResultadoPesquisa(id){
+
+    selecionarMarcadorPorId(
+
+        id
+
+    );
+
+}
+
+/*
+=========================================================
+VERIFICAR SELEÇÃO
+=========================================================
+*/
+
+function atualizarMarcadorSelecionado(){
+
+    if(
+
+        !marcadorSelecionado
+
+    ){
+
+        return;
+
+    }
+
+    if(
+
+        !grupoMarcadores.hasLayer(
+
+            marcadorSelecionado
+
+        )
+
+    ){
+
+        limparMarcadorSelecionado();
+
+    }
+
+}
 /*
 =========================================================
 MOSTRAR TIPO
@@ -391,15 +478,31 @@ function mostrarTipo(tipo){
 
         marcador=>{
 
-            if(marcador.tipo!==tipo){
+            if(
+
+                marcador.tipo!==tipo
+
+            ){
 
                 return;
 
             }
 
-            if(!grupoMarcadores.hasLayer(marcador)){
+            if(
 
-                grupoMarcadores.addLayer(marcador);
+                !grupoMarcadores.hasLayer(
+
+                    marcador
+
+                )
+
+            ){
+
+                grupoMarcadores.addLayer(
+
+                    marcador
+
+                );
 
             }
 
@@ -421,15 +524,31 @@ function esconderTipo(tipo){
 
         marcador=>{
 
-            if(marcador.tipo!==tipo){
+            if(
+
+                marcador.tipo!==tipo
+
+            ){
 
                 return;
 
             }
 
-            if(grupoMarcadores.hasLayer(marcador)){
+            if(
 
-                grupoMarcadores.removeLayer(marcador);
+                grupoMarcadores.hasLayer(
+
+                    marcador
+
+                )
+
+            ){
+
+                grupoMarcadores.removeLayer(
+
+                    marcador
+
+                );
 
             }
 
@@ -451,9 +570,21 @@ function mostrarTodosMarcadores(){
 
         marcador=>{
 
-            if(!grupoMarcadores.hasLayer(marcador)){
+            if(
 
-                grupoMarcadores.addLayer(marcador);
+                !grupoMarcadores.hasLayer(
+
+                    marcador
+
+                )
+
+            ){
+
+                grupoMarcadores.addLayer(
+
+                    marcador
+
+                );
 
             }
 
@@ -475,9 +606,21 @@ function esconderTodosMarcadores(){
 
         marcador=>{
 
-            if(grupoMarcadores.hasLayer(marcador)){
+            if(
 
-                grupoMarcadores.removeLayer(marcador);
+                grupoMarcadores.hasLayer(
+
+                    marcador
+
+                )
+
+            ){
+
+                grupoMarcadores.removeLayer(
+
+                    marcador
+
+                );
 
             }
 
@@ -486,15 +629,100 @@ function esconderTodosMarcadores(){
     );
 
 }
+
 /*
 =========================================================
-ATUALIZAR ZOOM DOS MARCADORES
+FILTRO POR CATEGORIA
+=========================================================
+*/
+
+function atualizarMarcadoresCategorias(
+
+    categorias
+
+){
+
+    marcadores.forEach(
+
+        marcador=>{
+
+            const categoria =
+
+                marcador.dados.categoria;
+
+            const mostrar =
+
+                categorias.includes(
+
+                    categoria
+
+                );
+
+            if(
+
+                mostrar
+
+            ){
+
+                if(
+
+                    !grupoMarcadores.hasLayer(
+
+                        marcador
+
+                    )
+
+                ){
+
+                    grupoMarcadores.addLayer(
+
+                        marcador
+
+                    );
+
+                }
+
+            }else{
+
+                if(
+
+                    grupoMarcadores.hasLayer(
+
+                        marcador
+
+                    )
+
+                ){
+
+                    grupoMarcadores.removeLayer(
+
+                        marcador
+
+                    );
+
+                }
+
+            }
+
+        }
+
+    );
+
+}
+
+/*
+=========================================================
+ZOOM DOS MARCADORES
 =========================================================
 */
 
 function atualizarZoomMarcadores(){
 
-    if(!mapa){
+    if(
+
+        !mapa
+
+    ){
 
         return;
 
@@ -504,27 +732,37 @@ function atualizarZoomMarcadores(){
 
     let escala = 1;
 
-    if(zoom <= 14){
+    if(zoom<=14){
 
         escala = 0.82;
 
-    }else if(zoom <= 15){
+    }
+
+    else if(zoom<=15){
 
         escala = 0.90;
 
-    }else if(zoom <= 16){
+    }
 
-        escala = 1;
+    else if(zoom<=16){
 
-    }else if(zoom <= 17){
+        escala = 1.00;
+
+    }
+
+    else if(zoom<=17){
 
         escala = 1.08;
 
-    }else if(zoom <= 18){
+    }
+
+    else if(zoom<=18){
 
         escala = 1.15;
 
-    }else{
+    }
+
+    else{
 
         escala = 1.22;
 
@@ -534,27 +772,47 @@ function atualizarZoomMarcadores(){
 
         marcador=>{
 
-            const elemento = marcador.getElement();
+            const elemento =
 
-            if(!elemento){
+                marcador.getElement();
 
-                return;
+            if(
 
-            }
+                !elemento
 
-            const marker = elemento.querySelector(
-
-                ".marker"
-
-            );
-
-            if(!marker){
+            ){
 
                 return;
 
             }
 
-            if(marker.classList.contains("marker-selecionado")){
+            const marker =
+
+                elemento.querySelector(
+
+                    ".marker"
+
+                );
+
+            if(
+
+                !marker
+
+            ){
+
+                return;
+
+            }
+
+            if(
+
+                marker.classList.contains(
+
+                    "marker-selecionado"
+
+                )
+
+            ){
 
                 return;
 
@@ -569,52 +827,9 @@ function atualizarZoomMarcadores(){
     );
 
 }
-
 /*
 =========================================================
-ATUALIZAR SELEÇÃO
-=========================================================
-*/
-
-function atualizarMarcadorSelecionado(){
-
-    if(!marcadorSelecionado){
-
-        return;
-
-    }
-
-    if(
-
-        !grupoMarcadores.hasLayer(
-
-            marcadorSelecionado
-
-        )
-
-    ){
-
-        limparMarcadorSelecionado();
-
-    }
-
-}
-
-/*
-=========================================================
-PESQUISA
-=========================================================
-*/
-
-function selecionarResultadoPesquisa(id){
-
-    selecionarMarcadorPorId(id);
-
-}
-
-/*
-=========================================================
-LIMPAR
+LIMPAR MARCADORES
 =========================================================
 */
 
@@ -622,7 +837,11 @@ function limparMarcadores(){
 
     limparMarcadorSelecionado();
 
-    grupoMarcadores.clearLayers();
+    if(grupoMarcadores){
+
+        grupoMarcadores.clearLayers();
+
+    }
 
     marcadores.length = 0;
 
@@ -648,45 +867,47 @@ function recarregarMarcadores(){
 
 /*
 =========================================================
-ANIMAÇÃO
+ADICIONAR
 =========================================================
 */
 
-function destacarMarcador(marcador){
+function adicionarMarcador(
 
-    const elemento = marcador.getElement();
+    dados,
 
-    if(!elemento){
+    tipo
 
-        return;
+){
 
-    }
+    criarMarcador(
 
-    const marker = elemento.querySelector(".marker");
+        dados,
 
-    if(!marker){
+        tipo
 
-        return;
-
-    }
-
-    marker.classList.remove("marker-animando");
-
-    void marker.offsetWidth;
-
-    marker.classList.add("marker-animando");
+    );
 
 }
 
 /*
 =========================================================
-ATUALIZAR MARCADOR
+ATUALIZAR
 =========================================================
 */
 
-function atualizarMarcador(id,dados){
+function atualizarMarcador(
 
-    const marcador = obterMarcador(id);
+    id,
+
+    dados
+
+){
+
+    const marcador = obterMarcador(
+
+        id
+
+    );
 
     if(!marcador){
 
@@ -702,17 +923,31 @@ function atualizarMarcador(id,dados){
 
     };
 
+    marcador.setIcon(
+
+        criarIcone(
+
+            marcador.dados
+
+        )
+
+    );
+
 }
 
 /*
 =========================================================
-REMOVER MARCADOR
+REMOVER
 =========================================================
 */
 
 function removerMarcador(id){
 
-    const marcador = obterMarcador(id);
+    const marcador = obterMarcador(
+
+        id
+
+    );
 
     if(!marcador){
 
@@ -720,17 +955,35 @@ function removerMarcador(id){
 
     }
 
-    grupoMarcadores.removeLayer(marcador);
+    grupoMarcadores.removeLayer(
 
-    const indice = marcadores.indexOf(marcador);
+        marcador
+
+    );
+
+    const indice = marcadores.indexOf(
+
+        marcador
+
+    );
 
     if(indice !== -1){
 
-        marcadores.splice(indice,1);
+        marcadores.splice(
+
+            indice,
+
+            1
+
+        );
 
     }
 
-    if(marcadorSelecionado === marcador){
+    if(
+
+        marcadorSelecionado === marcador
+
+    ){
 
         limparMarcadorSelecionado();
 
@@ -740,31 +993,17 @@ function removerMarcador(id){
 
 /*
 =========================================================
-ADICIONAR MARCADOR
-=========================================================
-*/
-
-function adicionarMarcador(dados,tipo){
-
-    criarMarcador(
-
-        dados,
-
-        tipo
-
-    );
-
-}
-
-/*
-=========================================================
-CENTRALIZAR E SELECIONAR
+ABRIR
 =========================================================
 */
 
 function abrirMarcador(id){
 
-    const marcador = obterMarcador(id);
+    const marcador = obterMarcador(
+
+        id
+
+    );
 
     if(!marcador){
 
@@ -772,9 +1011,11 @@ function abrirMarcador(id){
 
     }
 
-    selecionarMarcador(marcador);
+    selecionarMarcador(
 
-    destacarMarcador(marcador);
+        marcador
+
+    );
 
 }
 
@@ -784,7 +1025,7 @@ API
 =========================================================
 */
 
-window.marcadoresAPI={
+window.marcadoresAPI = {
 
     obterMarcador,
 
@@ -792,9 +1033,9 @@ window.marcadoresAPI={
 
     adicionarMarcador,
 
-    removerMarcador,
-
     atualizarMarcador,
+
+    removerMarcador,
 
     mostrarTipo,
 
@@ -802,7 +1043,11 @@ window.marcadoresAPI={
 
     mostrarTodosMarcadores,
 
-    esconderTodosMarcadores
+    esconderTodosMarcadores,
+
+    atualizarMarcadoresCategorias,
+
+    recarregarMarcadores
 
 };
 
