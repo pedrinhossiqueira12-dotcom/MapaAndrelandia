@@ -1,12 +1,20 @@
 /*
 =========================================================
-MAPA INTERATIVO DE ANDRELÂNDIA
+GUIA TURÍSTICO DE ANDRELÂNDIA
 local.js
-Versão 1.0
+Versão 2.0
+=========================================================
+*/
+
+/*
+=========================================================
+VARIÁVEIS
 =========================================================
 */
 
 let localAtual = null;
+
+let locais = [];
 
 /*
 =========================================================
@@ -34,7 +42,7 @@ async function iniciarPaginaLocal(){
 
 /*
 =========================================================
-CARREGAR DADOS
+CARREGAR JSON
 =========================================================
 */
 
@@ -42,11 +50,17 @@ async function carregarDados(){
 
     try{
 
-        const resposta = await fetch("../data/locais.json");
+        const resposta = await fetch(
+
+            "../data/locais.json"
+
+        );
 
         locais = await resposta.json();
 
-    }catch(e){
+    }
+
+    catch(e){
 
         paginaNaoEncontrada();
 
@@ -62,13 +76,13 @@ OBTER ID
 
 function obterID(){
 
-    const parametros = new URLSearchParams(
+    const params = new URLSearchParams(
 
         window.location.search
 
     );
 
-    return parametros.get("id");
+    return params.get("id");
 
 }
 
@@ -99,48 +113,127 @@ function localizarLocal(){
     preencherPagina();
 
 }
-
 /*
 =========================================================
-PREENCHER
+PREENCHER PÁGINA
 =========================================================
 */
 
 function preencherPagina(){
 
-    document.title = localAtual.nome;
+    document.title =
 
-    document.getElementById("capa").src =
-        localAtual.capa ||
-        "../img/interface/sem-foto.webp";
+        localAtual.nome ||
 
-    document.getElementById("titulo").textContent =
-        localAtual.nome || "";
+        "Guia Turístico";
 
-    document.getElementById("categoria").textContent =
-        localAtual.categoria || "";
+    definirTexto(
 
-    document.getElementById("descricao").textContent =
-        localAtual.descricao || "";
+        "titulo",
 
-    document.getElementById("historia").textContent =
-        localAtual.historia || "";
+        localAtual.nome
 
-    document.getElementById("curiosidades").textContent =
-        localAtual.curiosidades || "";
+    );
 
-    document.getElementById("tempo").textContent =
-        localAtual.tempoVisita || "";
+    definirTexto(
 
-    document.getElementById("endereco").textContent =
-        localAtual.endereco || "";
+        "categoria",
 
-    iniciarMapa();
+        localAtual.categoria
+
+    );
+
+    definirTexto(
+
+        "historia",
+
+        localAtual.historia
+
+    );
+
+    definirTexto(
+
+        "curiosidades",
+
+        localAtual.curiosidades
+
+    );
+
+    definirTexto(
+
+        "tempo",
+
+        localAtual.tempoVisita
+
+    );
+
+    definirTexto(
+
+        "endereco",
+
+        localAtual.endereco
+
+    );
+
+    const hero = document.getElementById(
+
+        "heroImagem"
+
+    );
+
+    if(hero){
+
+        hero.src =
+
+            localAtual.capa ||
+
+            localAtual.foto ||
+
+            "../img/interface/sem-foto.webp";
+
+        hero.alt =
+
+            localAtual.nome || "";
+
+    }
 
     carregarGaleria();
 
+    iniciarMapaLocal();
+
 }
 
+/*
+=========================================================
+UTILITÁRIO
+=========================================================
+*/
+
+function definirTexto(
+
+    id,
+
+    texto
+
+){
+
+    const elemento = document.getElementById(
+
+        id
+
+    );
+
+    if(!elemento){
+
+        return;
+
+    }
+
+    elemento.textContent =
+
+        texto || "";
+
+}
 /*
 =========================================================
 GALERIA
@@ -149,41 +242,182 @@ GALERIA
 
 function carregarGaleria(){
 
-    const galeria = document.getElementById("galeria");
+    const galeria = document.getElementById(
 
-    galeria.innerHTML = "";
+        "galeria"
 
-    if(!localAtual.galeria){
+    );
+
+    if(!galeria){
 
         return;
 
     }
 
-    localAtual.galeria.forEach(foto=>{
+    galeria.innerHTML = "";
 
-        const img = document.createElement("img");
+    if(
 
-        img.src = foto;
+        !Array.isArray(localAtual.galeria) ||
 
-        img.loading = "lazy";
+        localAtual.galeria.length===0
 
-        galeria.appendChild(img);
+    ){
 
-    });
+        galeria.innerHTML =
+
+            "<p>Nenhuma imagem disponível.</p>";
+
+        return;
+
+    }
+
+    localAtual.galeria.forEach(
+
+        foto=>{
+
+            const img = document.createElement(
+
+                "img"
+
+            );
+
+            img.src = foto;
+
+            img.loading = "lazy";
+
+            img.alt = localAtual.nome || "";
+
+            img.onerror = ()=>{
+
+                img.src =
+
+                "../img/interface/sem-foto.webp";
+
+            };
+
+            img.addEventListener(
+
+                "click",
+
+                ()=>{
+
+                    abrirLightbox(
+
+                        foto
+
+                    );
+
+                }
+
+            );
+
+            galeria.appendChild(
+
+                img
+
+            );
+
+        }
+
+    );
 
 }
 
 /*
 =========================================================
-MAPA
+LIGHTBOX
 =========================================================
 */
 
-function iniciarMapa(){
+function abrirLightbox(src){
+
+    const lightbox = document.getElementById(
+
+        "lightbox"
+
+    );
+
+    const imagem = document.getElementById(
+
+        "lightboxImagem"
+
+    );
+
+    if(
+
+        !lightbox ||
+
+        !imagem
+
+    ){
+
+        return;
+
+    }
+
+    imagem.src = src;
+
+    lightbox.classList.add(
+
+        "open"
+
+    );
+
+}
+
+function fecharLightbox(){
+
+    const lightbox = document.getElementById(
+
+        "lightbox"
+
+    );
+
+    if(!lightbox){
+
+        return;
+
+    }
+
+    lightbox.classList.remove(
+
+        "open"
+
+    );
+
+}
+/*
+=========================================================
+MAPA LOCAL
+=========================================================
+*/
+
+function iniciarMapaLocal(){
+
+    const elemento = document.getElementById(
+
+        "mapaLocal"
+
+    );
+
+    if(
+
+        !elemento ||
+
+        localAtual.latitude===undefined ||
+
+        localAtual.longitude===undefined
+
+    ){
+
+        return;
+
+    }
 
     const mapa = L.map(
 
-        "mapa",
+        "mapaLocal",
 
         {
 
@@ -193,7 +427,9 @@ function iniciarMapa(){
 
         }
 
-    ).setView(
+    );
+
+    mapa.setView(
 
         [
 
@@ -213,11 +449,17 @@ function iniciarMapa(){
 
         {
 
-            maxZoom:20
+            maxZoom:20,
+
+            maxNativeZoom:19
 
         }
 
-    ).addTo(mapa);
+    ).addTo(
+
+        mapa
+
+    );
 
     L.marker(
 
@@ -229,7 +471,11 @@ function iniciarMapa(){
 
         ]
 
-    ).addTo(mapa);
+    ).addTo(
+
+        mapa
+
+    );
 
 }
 
@@ -241,45 +487,111 @@ EVENTOS
 
 function configurarEventos(){
 
-    document.getElementById(
+    const voltar = document.getElementById(
 
         "btnVoltar"
 
-    ).addEventListener(
+    );
 
-        "click",
+    if(voltar){
 
-        ()=>history.back()
+        voltar.addEventListener(
+
+            "click",
+
+            ()=>history.back()
+
+        );
+
+    }
+
+    const rota = document.getElementById(
+
+        "btnComoChegar"
 
     );
 
-    document.getElementById(
+    if(rota){
 
-        "btnRota"
+        rota.addEventListener(
 
-    ).addEventListener(
+            "click",
 
-        "click",
+            ()=>{
 
-        ()=>{
+                window.open(
 
-            window.open(
+                    "https://www.google.com/maps/dir/?api=1&destination=" +
 
-                "https://www.google.com/maps/dir/?api=1&destination="+
+                    localAtual.latitude +
 
-                localAtual.latitude+
+                    "," +
 
-                ","+
+                    localAtual.longitude,
 
-                localAtual.longitude,
+                    "_blank"
 
-                "_blank"
+                );
 
-            );
+            }
 
-        }
+        );
+
+    }
+
+    const compartilhar = document.getElementById(
+
+        "btnCompartilhar"
 
     );
+
+    if(
+
+        compartilhar &&
+
+        navigator.share
+
+    ){
+
+        compartilhar.addEventListener(
+
+            "click",
+
+            ()=>{
+
+                navigator.share({
+
+                    title:localAtual.nome,
+
+                    text:localAtual.nome,
+
+                    url:window.location.href
+
+                });
+
+            }
+
+        );
+
+    }
+
+    const lightbox = document.getElementById(
+
+        "lightbox"
+
+    );
+
+    if(lightbox){
+
+        lightbox.addEventListener(
+
+            "click",
+
+            fecharLightbox
+
+        );
+
+    }
 
 }
 
@@ -291,8 +603,48 @@ ERRO
 
 function paginaNaoEncontrada(){
 
-    document.body.innerHTML =
+    document.body.innerHTML = `
 
-    "<h1>Local não encontrado.</h1>";
+        <main style="padding:40px;text-align:center;">
+
+            <h1>
+
+                Local não encontrado
+
+            </h1>
+
+            <p>
+
+                O ponto turístico solicitado não existe.
+
+            </p>
+
+        </main>
+
+    `;
 
 }
+
+/*
+=========================================================
+API
+=========================================================
+*/
+
+window.localAPI = {
+
+    obterID,
+
+    iniciarMapaLocal,
+
+    abrirLightbox,
+
+    fecharLightbox
+
+};
+
+/*
+=========================================================
+FIM
+=========================================================
+*/
