@@ -2,23 +2,25 @@
 =========================================================
 MAPA INTERATIVO DE ANDRELÂNDIA
 filtros.js
-Versão 2.0
+Versão 3.0
 =========================================================
 */
 
 /*
 =========================================================
-FILTROS
+ESTADO
 =========================================================
 */
 
-const filtros = {
+const filtros={
 
     turismo:true,
 
     comercios:true,
 
-    categorias:new Set()
+    categoriasDisponiveis:[],
+
+    categoriasAtivas:new Set()
 
 };
 
@@ -31,6 +33,8 @@ INICIAR
 function iniciarFiltros(){
 
     criarCategorias();
+
+    criarInterfaceCategorias();
 
     configurarFiltros();
 
@@ -46,7 +50,7 @@ CRIAR CATEGORIAS
 
 function criarCategorias(){
 
-    filtros.categorias.clear();
+    const lista = new Set();
 
     [...locais,...comercios].forEach(
 
@@ -54,7 +58,7 @@ function criarCategorias(){
 
             if(item.categoria){
 
-                filtros.categorias.add(
+                lista.add(
 
                     item.categoria
 
@@ -66,11 +70,134 @@ function criarCategorias(){
 
     );
 
+    filtros.categoriasDisponiveis =
+
+        [...lista].sort();
+
+}
+/*
+=========================================================
+CRIAR INTERFACE DAS CATEGORIAS
+=========================================================
+*/
+
+function criarInterfaceCategorias(){
+
+    const container = document.getElementById(
+
+        "categoriasContainer"
+
+    );
+
+    if(!container){
+
+        return;
+
+    }
+
+    container.innerHTML =
+
+        "<h3>Categorias</h3>";
+
+    filtros.categoriasDisponiveis.forEach(
+
+        categoria=>{
+
+            const item = document.createElement(
+
+                "div"
+
+            );
+
+            item.className =
+
+                "itemFiltro";
+
+            item.innerHTML = `
+
+                <span>
+
+                    ${escaparHTML(categoria)}
+
+                </span>
+
+                <label class="switch">
+
+                    <input
+
+                        type="checkbox"
+
+                        checked
+
+                        data-categoria="${escaparHTML(categoria)}">
+
+                    <span class="slider"></span>
+
+                </label>
+
+            `;
+
+            const checkbox = item.querySelector(
+
+                "input"
+
+            );
+
+            filtros.categoriasAtivas.add(
+
+                categoria
+
+            );
+
+            checkbox.addEventListener(
+
+                "change",
+
+                ()=>{
+
+                    if(
+
+                        checkbox.checked
+
+                    ){
+
+                        filtros.categoriasAtivas.add(
+
+                            categoria
+
+                        );
+
+                    }else{
+
+                        filtros.categoriasAtivas.delete(
+
+                            categoria
+
+                        );
+
+                    }
+
+                    aplicarFiltros();
+
+                }
+
+            );
+
+            container.appendChild(
+
+                item
+
+            );
+
+        }
+
+    );
+
 }
 
 /*
 =========================================================
-CONFIGURAR
+CONFIGURAR BOTÕES
 =========================================================
 */
 
@@ -90,7 +217,9 @@ function configurarFiltros(){
 
     if(turismo){
 
-        turismo.checked = filtros.turismo;
+        turismo.checked =
+
+            filtros.turismo;
 
         turismo.addEventListener(
 
@@ -98,7 +227,9 @@ function configurarFiltros(){
 
             ()=>{
 
-                filtros.turismo = turismo.checked;
+                filtros.turismo =
+
+                    turismo.checked;
 
                 aplicarFiltros();
 
@@ -110,7 +241,9 @@ function configurarFiltros(){
 
     if(comercios){
 
-        comercios.checked = filtros.comercios;
+        comercios.checked =
+
+            filtros.comercios;
 
         comercios.addEventListener(
 
@@ -118,7 +251,9 @@ function configurarFiltros(){
 
             ()=>{
 
-                filtros.comercios = comercios.checked;
+                filtros.comercios =
+
+                    comercios.checked;
 
                 aplicarFiltros();
 
@@ -129,16 +264,19 @@ function configurarFiltros(){
     }
 
 }
-
 /*
 =========================================================
-APLICAR
+APLICAR FILTROS
 =========================================================
 */
 
 function aplicarFiltros(){
 
-    if(!grupoMarcadores){
+    if(
+
+        !grupoMarcadores
+
+    ){
 
         return;
 
@@ -176,17 +314,19 @@ function aplicarFiltros(){
 
             if(
 
-                filtros.categorias.size>0 &&
+                visivel &&
 
-                !filtros.categorias.has(
-
-                    marcador.dados.categoria
-
-                )
+                filtros.categoriasAtivas.size>0
 
             ){
 
-                visivel = false;
+                visivel =
+
+                    filtros.categoriasAtivas.has(
+
+                        marcador.dados.categoria
+
+                    );
 
             }
 
@@ -242,42 +382,49 @@ function aplicarFiltros(){
 
 /*
 =========================================================
-CATEGORIAS
+MOSTRAR TUDO
 =========================================================
 */
 
-function ativarCategoria(categoria){
+function mostrarTudo(){
 
-    filtros.categorias.add(
+    filtros.turismo = true;
 
-        categoria
+    filtros.comercios = true;
+
+    filtros.categoriasAtivas.clear();
+
+    filtros.categoriasDisponiveis.forEach(
+
+        categoria=>{
+
+            filtros.categoriasAtivas.add(
+
+                categoria
+
+            );
+
+        }
+
+    );
+
+    document.querySelectorAll(
+
+        "#categoriasContainer input"
+
+    ).forEach(
+
+        checkbox=>{
+
+            checkbox.checked = true;
+
+        }
 
     );
 
     aplicarFiltros();
 
 }
-
-function desativarCategoria(categoria){
-
-    filtros.categorias.delete(
-
-        categoria
-
-    );
-
-    aplicarFiltros();
-
-}
-
-function limparCategorias(){
-
-    filtros.categorias.clear();
-
-    aplicarFiltros();
-
-}
-
 /*
 =========================================================
 ATALHOS
@@ -316,19 +463,47 @@ function esconderComercios(){
 
 }
 
-function mostrarTudo(){
+/*
+=========================================================
+CATEGORIAS
+=========================================================
+*/
 
-    filtros.turismo = true;
+function ativarCategoria(categoria){
 
-    filtros.comercios = true;
+    filtros.categoriasAtivas.add(
 
-    limparCategorias();
+        categoria
+
+    );
+
+    aplicarFiltros();
+
+}
+
+function desativarCategoria(categoria){
+
+    filtros.categoriasAtivas.delete(
+
+        categoria
+
+    );
+
+    aplicarFiltros();
+
+}
+
+function limparCategorias(){
+
+    filtros.categoriasAtivas.clear();
+
+    aplicarFiltros();
 
 }
 
 /*
 =========================================================
-RECARREGAR
+ATUALIZAR
 =========================================================
 */
 
@@ -336,6 +511,44 @@ function atualizarFiltros(){
 
     criarCategorias();
 
+    criarInterfaceCategorias();
+
     aplicarFiltros();
 
 }
+
+/*
+=========================================================
+API
+=========================================================
+*/
+
+window.filtrosAPI = {
+
+    aplicarFiltros,
+
+    atualizarFiltros,
+
+    mostrarTudo,
+
+    mostrarTurismo,
+
+    esconderTurismo,
+
+    mostrarComercios,
+
+    esconderComercios,
+
+    ativarCategoria,
+
+    desativarCategoria,
+
+    limparCategorias
+
+};
+
+/*
+=========================================================
+FIM
+=========================================================
+*/
