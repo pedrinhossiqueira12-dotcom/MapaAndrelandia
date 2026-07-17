@@ -117,13 +117,13 @@ INICIAR MAPA
 =========================================================
 */
 
-function iniciarMapa(){
+async function iniciarMapa(){
 
     criarMapa();
 
     criarPanes();
 
-    criarCamadas();
+    await criarCamadas();
 
 }
 /*
@@ -258,11 +258,6 @@ function criarPanes(){
     ).style.zIndex = 260;
 
 }
-/*
-=========================================================
-GRID LAYER - PAPEL
-=========================================================
-*/
 
 /*
 =========================================================
@@ -337,11 +332,6 @@ const CamadaPapel = L.GridLayer.extend({
     }
 
 });
-/*
-=========================================================
-PAPEL
-=========================================================
-*/
 
 /*
 =========================================================
@@ -374,13 +364,14 @@ function criarCamadaPapel(){
     );
 
 }
+
 /*
 =========================================================
 CRIAR CAMADAS
 =========================================================
 */
 
-function criarCamadas(){
+async function criarCamadas(){
 
     criarCamadaSatelite();
 
@@ -395,6 +386,237 @@ function criarCamadas(){
     criarCamadaNomesRuas();
 
     criarCamadaNomesBairros();
+
+    if(mapaIlustrado){
+
+        await carregarPergaminho();
+
+    }
+
+    else{
+
+        await carregarSatelite();
+
+    }
+
+}
+/*
+=========================================================
+AGUARDAR
+=========================================================
+*/
+
+function esperar(ms){
+
+    return new Promise(
+
+        resolve=>setTimeout(
+
+            resolve,
+
+            ms
+
+        )
+
+    );
+
+}
+/*
+=========================================================
+CARREGAR PERGAMINHO
+=========================================================
+*/
+
+async function carregarPergaminho(){
+
+    if(mapa.hasLayer(camadaSatelite)){
+
+        mapa.removeLayer(
+
+            camadaSatelite
+
+        );
+
+    }
+
+    camadaMapa.addTo(
+
+        mapa
+
+    );
+
+    await esperar(40);
+
+    camadaPapel.addTo(
+
+        mapa
+
+    );
+
+    await esperar(40);
+
+    camadaVegetacao.addTo(
+
+        mapa
+
+    );
+
+    await esperar(40);
+
+    camadaBairros.addTo(
+
+        mapa
+
+    );
+
+    await esperar(40);
+
+    camadaNomesRuas.addTo(
+
+        mapa
+
+    );
+
+    await esperar(40);
+
+    camadaNomesBairros.addTo(
+
+        mapa
+
+    );
+
+}
+/*
+=========================================================
+CARREGAR SATÉLITE
+=========================================================
+*/
+
+async function carregarSatelite(){
+
+    removerCamadasIlustradas();
+
+    if(!mapa.hasLayer(camadaSatelite)){
+
+        camadaSatelite.addTo(
+
+            mapa
+
+        );
+
+    }
+
+}
+/*
+=========================================================
+CARREGAMENTO PROGRESSIVO
+=========================================================
+*/
+
+async function carregarCamadasProgressivamente(){
+
+    removerCamadasIlustradas();
+
+    camadaMapa.addTo(
+
+        mapa
+
+    );
+
+    await esperar(80);
+
+    camadaPapel.addTo(
+
+        mapa
+
+    );
+
+    await esperar(80);
+
+    camadaVegetacao.addTo(
+
+        mapa
+
+    );
+
+    await esperar(80);
+
+    camadaBairros.addTo(
+
+        mapa
+
+    );
+
+    await esperar(80);
+
+    camadaNomesRuas.addTo(
+
+        mapa
+
+    );
+
+    await esperar(80);
+
+    camadaNomesBairros.addTo(
+
+        mapa
+
+    );
+
+}
+/*
+=========================================================
+ADICIONAR CAMADAS ILUSTRADAS
+=========================================================
+*/
+
+function adicionarCamadasIlustradas(){
+
+    if(!mapa.hasLayer(camadaPapel))
+        camadaPapel.addTo(mapa);
+
+    if(!mapa.hasLayer(camadaBairros))
+        camadaBairros.addTo(mapa);
+
+    if(!mapa.hasLayer(camadaVegetacao))
+        camadaVegetacao.addTo(mapa);
+
+    if(!mapa.hasLayer(camadaMapa))
+        camadaMapa.addTo(mapa);
+
+    if(!mapa.hasLayer(camadaNomesRuas))
+        camadaNomesRuas.addTo(mapa);
+
+    if(!mapa.hasLayer(camadaNomesBairros))
+        camadaNomesBairros.addTo(mapa);
+
+}
+
+/*
+=========================================================
+REMOVER CAMADAS ILUSTRADAS
+=========================================================
+*/
+
+function removerCamadasIlustradas(){
+
+    if(mapa.hasLayer(camadaPapel))
+        mapa.removeLayer(camadaPapel);
+
+    if(mapa.hasLayer(camadaBairros))
+        mapa.removeLayer(camadaBairros);
+
+    if(mapa.hasLayer(camadaVegetacao))
+        mapa.removeLayer(camadaVegetacao);
+
+    if(mapa.hasLayer(camadaMapa))
+        mapa.removeLayer(camadaMapa);
+
+    if(mapa.hasLayer(camadaNomesRuas))
+        mapa.removeLayer(camadaNomesRuas);
+
+    if(mapa.hasLayer(camadaNomesBairros))
+        mapa.removeLayer(camadaNomesBairros);
 
 }
 /*
@@ -674,17 +896,18 @@ function ocultarCamadasIlustradas(){
     camadaNomesBairros.setOpacity(0);
 
 }
+
 /*
 =========================================================
 MODO PERGAMINHO
 =========================================================
 */
 
-function ativarModoPergaminho(){
+async function ativarModoPergaminho(){
 
     mapaIlustrado = true;
 
-    mostrarCamadasIlustradas();
+    await carregarPergaminho();
 
     document.body.classList.remove(
 
@@ -699,18 +922,17 @@ function ativarModoPergaminho(){
     );
 
 }
-
 /*
 =========================================================
 MODO SATÉLITE
 =========================================================
 */
 
-function ativarModoSatelite(){
+async function ativarModoSatelite(){
 
     mapaIlustrado = false;
 
-    ocultarCamadasIlustradas();
+    await carregarSatelite();
 
     document.body.classList.remove(
 
