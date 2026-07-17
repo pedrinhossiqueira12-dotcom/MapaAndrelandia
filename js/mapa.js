@@ -44,7 +44,7 @@ CONFIGURAÇÃO
 
 const CONFIG = {
 
-    centro: [
+    centro:[
 
         -21.74135,
 
@@ -54,22 +54,47 @@ const CONFIG = {
 
     zoomInicial:16,
 
-    zoomMinimo:14,
+    zoomMinimo:16,
 
     zoomMaximo:20,
 
     animacao:.40,
 
     limites:[
+
         [
+
             -21.731000,
+
             -44.320000
+
         ],
+
         [
+
             -21.751000,
+
             -44.296000
+
         ]
+
     ],
+
+    opacidade:{
+
+        papel:1,
+
+        bairros:.35,
+
+        vegetacao:.55,
+
+        mapa:1,
+
+        nomesRuas:1,
+
+        nomesBairros:1
+
+    },
 
     caminhos:{
 
@@ -91,25 +116,7 @@ OVERLAY DO MAPA
 =========================================================
 */
 
-const LIMITES_OVERLAY = [
-
-    [
-
-        -21.731000,
-
-        -44.320000
-
-    ],
-
-    [
-
-        -21.751000,
-
-        -44.296000
-
-    ]
-
-];
+const LIMITES_OVERLAY = CONFIG.limites;
 /*
 =========================================================
 INICIALIZAR MAPA
@@ -150,6 +157,8 @@ function criarMapa(){
 
             attributionControl:false,
 
+            preferCanvas:true,
+
             minZoom:CONFIG.zoomMinimo,
 
             maxZoom:CONFIG.zoomMaximo,
@@ -158,7 +167,9 @@ function criarMapa(){
 
             maxBoundsViscosity:1,
 
-            preferCanvas:true
+            zoomSnap:.25,
+
+            zoomDelta:.25
 
         }
 
@@ -169,6 +180,12 @@ function criarMapa(){
         CONFIG.centro,
 
         CONFIG.zoomInicial
+
+    );
+
+    mapa.fitBounds(
+
+        CONFIG.limites
 
     );
 
@@ -233,19 +250,33 @@ PAPEL
 =========================================================
 */
 
+/*
+=========================================================
+PAPEL
+=========================================================
+*/
+
 function criarCamadaPapel(){
 
-    camadaPapel = L.imageOverlay(
+    camadaPapel = L.tileLayer(
 
-        CONFIG.caminhos.mapa + "papel.webp",
+        CONFIG.caminhos.mapa +
 
-        LIMITES_OVERLAY,
+        "papel.webp",
 
         {
 
-            opacity:1,
+            tileSize:472,
 
-            interactive:false
+            noWrap:true,
+
+            opacity:CONFIG.opacidade.papel,
+
+            bounds:CONFIG.limites,
+
+            updateWhenZooming:false,
+
+            updateWhenIdle:true
 
         }
 
@@ -275,7 +306,7 @@ function criarCamadaBairros(){
 
         {
 
-            opacity:1,
+            opacity:CONFIG.opacidade.bairros
 
             interactive:false
 
@@ -307,7 +338,7 @@ function criarCamadaVegetacao(){
 
         {
 
-            opacity:1,
+            opacity:CONFIG.opacidade.vegetacao
 
             interactive:false
 
@@ -339,7 +370,7 @@ function criarCamadaMapa(){
 
         {
 
-            opacity:1,
+            opacity:CONFIG.opacidade.mapa
 
             interactive:false
 
@@ -371,7 +402,7 @@ function criarCamadaNomesRuas(){
 
         {
 
-            opacity:1,
+            opacity:CONFIG.opacidade.nomesRuas
 
             interactive:false
 
@@ -403,7 +434,7 @@ function criarCamadaNomesBairros(){
 
         {
 
-            opacity:1,
+            opacity:CONFIG.opacidade.nomesBairros
 
             interactive:false
 
