@@ -8,11 +8,90 @@ Versão 4.0
 
 /*
 =========================================================
-LIMITES DO MAPA
+VARIÁVEIS GLOBAIS
 =========================================================
 */
 
-const LIMITES_MAPA = [
+let mapa = null;
+
+let camadaSatelite = null;
+
+let camadaPapel = null;
+
+let camadaBairros = null;
+
+let camadaVegetacao = null;
+
+let camadaMapa = null;
+
+let camadaNomesRuas = null;
+
+let camadaNomesBairros = null;
+
+let marcadorUsuario = null;
+
+let circuloPrecisao = null;
+
+let grupoMarcadores = null;
+
+let marcadores = [];
+
+/*
+=========================================================
+CONFIGURAÇÃO
+=========================================================
+*/
+
+const CONFIG = {
+
+    centro: [
+
+        -21.74135,
+
+        -44.30920
+
+    ],
+
+    zoomInicial:16,
+
+    zoomMinimo:14,
+
+    zoomMaximo:20,
+
+    animacao:.40,
+
+    limites:[
+        [
+            -21.731000,
+            -44.320000
+        ],
+        [
+            -21.751000,
+            -44.296000
+        ]
+    ],
+
+    caminhos:{
+
+        mapa:"img/mapa/",
+
+        icones:"img/icones/",
+
+        interface:"img/interface/",
+
+        locais:"img/locais/"
+
+    }
+
+};
+
+/*
+=========================================================
+OVERLAY DO MAPA
+=========================================================
+*/
+
+const LIMITES_OVERLAY = [
 
     [
 
@@ -31,14 +110,35 @@ const LIMITES_MAPA = [
     ]
 
 ];
-
 /*
 =========================================================
-INICIAR MAPA
+INICIALIZAR MAPA
 =========================================================
 */
 
+document.addEventListener(
+
+    "DOMContentLoaded",
+
+    iniciarMapa
+
+);
+
 function iniciarMapa(){
+
+    criarMapa();
+
+    criarCamadas();
+
+}
+
+/*
+=========================================================
+CRIAR MAPA
+=========================================================
+*/
+
+function criarMapa(){
 
     mapa = L.map(
 
@@ -46,95 +146,61 @@ function iniciarMapa(){
 
         {
 
-            center: CONFIG.centro,
+            zoomControl:false,
 
-            zoom: CONFIG.zoomInicial,
+            attributionControl:false,
 
-            minZoom: CONFIG.zoomMinimo,
+            minZoom:CONFIG.zoomMinimo,
 
-            maxZoom: CONFIG.zoomMaximo,
+            maxZoom:CONFIG.zoomMaximo,
 
-            zoomControl: false,
+            maxBounds:CONFIG.limites,
 
-            attributionControl: false,
+            maxBoundsViscosity:1,
 
-            preferCanvas: true,
-
-            zoomSnap: 0.25,
-
-            zoomDelta: 0.25,
-
-            wheelPxPerZoomLevel: 120,
-
-            inertia: true,
-
-            inertiaDeceleration: 2500,
-
-            worldCopyJump: false,
-
-            maxBounds: LIMITES_MAPA,
-
-            maxBoundsViscosity: 1,
-
-            zoomAnimation: true,
-
-            fadeAnimation: true,
-
-            markerZoomAnimation: true
+            preferCanvas:true
 
         }
 
     );
 
-    criarCamadaSatelite();
+    mapa.setView(
 
-    criarPanes();
+        CONFIG.centro,
 
-    criarCamadasSVG();
-
-    criarTexturaPergaminho();
-
-    registrarEventosMapa();
-
-    atualizarModoMapa();
-
-}
-
-/*
-=========================================================
-PANES
-=========================================================
-*/
-
-function criarPanes(){
-
-    if(
-
-        mapa.getPane("paneSVG")
-
-    ){
-
-        return;
-
-    }
-
-    mapa.createPane(
-
-        "paneSVG"
+        CONFIG.zoomInicial
 
     );
 
-    mapa.getPane(
+}
 
-        "paneSVG"
+/*
+=========================================================
+CRIAR CAMADAS
+=========================================================
+*/
 
-    ).style.zIndex = 350;
+function criarCamadas(){
+
+    criarCamadaSatelite();
+
+    criarCamadaPapel();
+
+    criarCamadaBairros();
+
+    criarCamadaVegetacao();
+
+    criarCamadaMapa();
+
+    criarCamadaNomesRuas();
+
+    criarCamadaNomesBairros();
 
 }
 
 /*
 =========================================================
-CAMADA SATÉLITE
+SATÉLITE
 =========================================================
 */
 
@@ -146,19 +212,9 @@ function criarCamadaSatelite(){
 
         {
 
-            attribution: "© Esri",
+            maxZoom:20,
 
-            maxZoom: 20,
-
-            maxNativeZoom: 19,
-
-            noWrap: true,
-
-            keepBuffer: 6,
-
-            updateWhenIdle: true,
-
-            updateWhenZooming: false
+            crossOrigin:true
 
         }
 
@@ -173,123 +229,31 @@ function criarCamadaSatelite(){
 }
 /*
 =========================================================
-CAMADAS SVG
+PAPEL
 =========================================================
 */
 
-function criarCamadasSVG(){
+function criarCamadaPapel(){
 
-    limparCamadasSVG();
+    camadaPapel = L.imageOverlay(
 
-    adicionarSVG("ruas.svg");
+        CONFIG.caminhos.mapa + "papel.webp",
 
-    adicionarSVG("rios.svg");
-
-    adicionarSVG("vegetacao.svg");
-
-    adicionarSVG("trilhas.svg");
-
-    adicionarSVG("desenhos.svg");
-
-}
-
-function adicionarSVG(nome){
-
-    const camada = L.svgOverlay(
-
-        CONFIG.caminhos.overlay + nome,
-
-        LIMITES_MAPA,
+        LIMITES_OVERLAY,
 
         {
 
-            pane: "paneSVG",
+            opacity:1,
 
-            opacity: 1,
-
-            interactive: false
+            interactive:false
 
         }
 
     );
 
-    camadasSVG.push(
+    camadaPapel.addTo(
 
-        camada
-
-    );
-
-    if(mapaIlustrado){
-
-        camada.addTo(
-
-            mapa
-
-        );
-
-    }
-
-}
-
-/*
-=========================================================
-TEXTURA PERGAMINHO
-=========================================================
-*/
-
-function criarTexturaPergaminho(){
-
-    let textura = document.getElementById(
-
-        "texturaPergaminho"
-
-    );
-
-    if(textura){
-
-        return;
-
-    }
-
-    textura = document.createElement(
-
-        "div"
-
-    );
-
-    textura.id = "texturaPergaminho";
-
-    textura.style.position = "absolute";
-
-    textura.style.left = "0";
-
-    textura.style.top = "0";
-
-    textura.style.width = "100%";
-
-    textura.style.height = "100%";
-
-    textura.style.pointerEvents = "none";
-
-    textura.style.zIndex = "349";
-
-    textura.style.opacity = ".38";
-
-    textura.style.backgroundImage =
-
-        "url('img/interface/papel.webp')";
-
-    textura.style.backgroundRepeat =
-
-        "repeat";
-
-    textura.style.backgroundSize =
-
-        "700px";
-
-    mapa.getContainer().appendChild(
-
-        textura
+        mapa
 
     );
 
@@ -297,341 +261,95 @@ function criarTexturaPergaminho(){
 
 /*
 =========================================================
-ATUALIZAR TEXTURA
+BAIRROS
 =========================================================
 */
 
-function atualizarTexturaPergaminho(){
+function criarCamadaBairros(){
 
-    const textura = document.getElementById(
+    camadaBairros = L.imageOverlay(
 
-        "texturaPergaminho"
+        CONFIG.caminhos.mapa + "bairros.svg",
 
-    );
+        LIMITES_OVERLAY,
 
-    if(!textura){
+        {
 
-        return;
+            opacity:1,
 
-    }
-
-    textura.style.display =
-
-        mapaIlustrado
-
-            ? "block"
-
-            : "none";
-
-}
-
-/*
-=========================================================
-MOSTRAR SVGs
-=========================================================
-*/
-
-function mostrarSVGs(){
-
-    if(!camadasSVG.length){
-
-        return;
-
-    }
-
-    camadasSVG.forEach(
-
-        camada=>{
-
-            if(
-
-                !mapa.hasLayer(
-
-                    camada
-
-                )
-
-            ){
-
-                camada.addTo(
-
-                    mapa
-
-                );
-
-            }
+            interactive:false
 
         }
 
     );
 
+    camadaBairros.addTo(
+
+        mapa
+
+    );
+
 }
 
 /*
 =========================================================
-ESCONDER SVGs
+VEGETAÇÃO
 =========================================================
 */
 
-function esconderSVGs(){
+function criarCamadaVegetacao(){
 
-    if(!camadasSVG.length){
+    camadaVegetacao = L.imageOverlay(
 
-        return;
+        CONFIG.caminhos.mapa + "vegetacao.svg",
 
-    }
+        LIMITES_OVERLAY,
 
-    camadasSVG.forEach(
+        {
 
-        camada=>{
+            opacity:1,
 
-            if(
-
-                mapa.hasLayer(
-
-                    camada
-
-                )
-
-            ){
-
-                mapa.removeLayer(
-
-                    camada
-
-                );
-
-            }
+            interactive:false
 
         }
 
     );
 
-}
+    camadaVegetacao.addTo(
 
-/*
-=========================================================
-RECARREGAR SVGs
-=========================================================
-*/
+        mapa
 
-function recarregarSVGs(){
-
-    limparCamadasSVG();
-
-    criarCamadasSVG();
-
-}
-/*
-=========================================================
-MODOS DO MAPA
-=========================================================
-*/
-
-function atualizarModoMapa(){
-
-    if(mapaIlustrado){
-
-        ativarModoPergaminho();
-
-    }else{
-
-        ativarModoSatelite();
-
-    }
-
-}
-
-function alternarModoMapa(){
-
-    mapaIlustrado = !mapaIlustrado;
-
-    atualizarModoMapa();
+    );
 
 }
 
 /*
 =========================================================
-MODO PERGAMINHO
+MAPA
 =========================================================
 */
 
-function ativarModoPergaminho(){
+function criarCamadaMapa(){
 
-    document.body.classList.add(
+    camadaMapa = L.imageOverlay(
 
-        "modo-pergaminho"
+        CONFIG.caminhos.mapa + "mapa.svg",
 
-    );
+        LIMITES_OVERLAY,
 
-    document.body.classList.remove(
+        {
 
-        "modo-satelite"
+            opacity:1,
 
-    );
-
-    atualizarTexturaPergaminho();
-
-    mostrarSVGs();
-
-    atualizarBotaoModo();
-
-}
-
-/*
-=========================================================
-MODO SATÉLITE
-=========================================================
-*/
-
-function ativarModoSatelite(){
-
-    document.body.classList.remove(
-
-        "modo-pergaminho"
-
-    );
-
-    document.body.classList.add(
-
-        "modo-satelite"
-
-    );
-
-    atualizarTexturaPergaminho();
-
-    esconderSVGs();
-
-    atualizarBotaoModo();
-
-}
-
-/*
-=========================================================
-BOTÃO DO MODO
-=========================================================
-*/
-
-function atualizarBotaoModo(){
-
-    const botao = document.getElementById(
-
-        "btnSatellite"
-
-    );
-
-    if(!botao){
-
-        return;
-
-    }
-
-    const imagem = botao.querySelector(
-
-        "img"
-
-    );
-
-    if(!imagem){
-
-        return;
-
-    }
-
-    if(mapaIlustrado){
-
-        imagem.src =
-
-            "img/interface/satelite.svg";
-
-        imagem.alt =
-
-            "Modo Satélite";
-
-        botao.title =
-
-            "Modo Satélite";
-
-    }else{
-
-        imagem.src =
-
-            "img/interface/pergaminho.svg";
-
-        imagem.alt =
-
-            "Modo Pergaminho";
-
-        botao.title =
-
-            "Modo Pergaminho";
-
-    }
-
-}
-
-/*
-=========================================================
-DEFINIR MODO
-=========================================================
-*/
-
-function definirModoMapa(pergaminho){
-
-    mapaIlustrado = Boolean(
-
-        pergaminho
-
-    );
-
-    atualizarModoMapa();
-
-}
-/*
-=========================================================
-EVENTOS DO MAPA
-=========================================================
-*/
-
-function registrarEventosMapa(){
-
-    mapa.on(
-
-        "click",
-
-        clicarMapa
-
-    );
-
-    mapa.on(
-
-        "zoomend",
-
-        ()=>{
-
-            atualizarZoom();
-
-            if(typeof atualizarZoomMarcadores==="function"){
-
-                atualizarZoomMarcadores();
-
-            }
+            interactive:false
 
         }
 
     );
 
-    mapa.on(
+    camadaMapa.addTo(
 
-        "moveend",
-
-        atualizarMovimento
-
-    );
-
-    mapa.whenReady(
-
-        mapaCarregado
+        mapa
 
     );
 
@@ -639,53 +357,31 @@ function registrarEventosMapa(){
 
 /*
 =========================================================
-MAPA CARREGADO
+NOMES DAS RUAS
 =========================================================
 */
 
-function mapaCarregado(){
+function criarCamadaNomesRuas(){
 
-    atualizarZoom();
+    camadaNomesRuas = L.imageOverlay(
 
-    atualizarMovimento();
+        CONFIG.caminhos.mapa + "nomes-ruas.svg",
 
-}
+        LIMITES_OVERLAY,
 
-/*
-=========================================================
-CLIQUE NO MAPA
-=========================================================
-*/
+        {
 
-function clicarMapa(){
+            opacity:1,
 
-    if(typeof fecharSheet==="function"){
+            interactive:false
 
-        fecharSheet();
+        }
 
-    }
+    );
 
-}
+    camadaNomesRuas.addTo(
 
-/*
-=========================================================
-ZOOM
-=========================================================
-*/
-
-function atualizarZoom(){
-
-    if(!mapa){
-
-        return;
-
-    }
-
-    document.body.setAttribute(
-
-        "data-zoom",
-
-        mapa.getZoom()
+        mapa
 
     );
 
@@ -693,19 +389,35 @@ function atualizarZoom(){
 
 /*
 =========================================================
-MOVIMENTO
+NOMES DOS BAIRROS
 =========================================================
 */
 
-function atualizarMovimento(){
+function criarCamadaNomesBairros(){
 
-    /*
-    Espaço reservado para
-    futuras otimizações.
-    */
+    camadaNomesBairros = L.imageOverlay(
+
+        CONFIG.caminhos.mapa + "nomes-bairros.svg",
+
+        LIMITES_OVERLAY,
+
+        {
+
+            opacity:1,
+
+            interactive:false
+
+        }
+
+    );
+
+    camadaNomesBairros.addTo(
+
+        mapa
+
+    );
 
 }
-
 /*
 =========================================================
 CENTRALIZAR MAPA
@@ -718,7 +430,7 @@ function centralizarMapa(
 
     longitude,
 
-    zoom = 18
+    zoom = mapa.getZoom()
 
 ){
 
@@ -754,109 +466,13 @@ function centralizarMapa(
 
 /*
 =========================================================
-ENQUADRAR ÁREA
+OBTER MAPA
 =========================================================
 */
 
-function enquadrarMapa(bounds){
+function obterMapa(){
 
-    if(!mapa){
-
-        return;
-
-    }
-
-    mapa.fitBounds(
-
-        bounds,
-
-        {
-
-            padding:[40,40],
-
-            animate:true
-
-        }
-
-    );
-
-}
-
-/*
-=========================================================
-REDIMENSIONAR
-=========================================================
-*/
-
-function atualizarTamanhoMapa(){
-
-    if(!mapa){
-
-        return;
-
-    }
-
-    mapa.invalidateSize(
-
-        {
-
-            animate:false
-
-        }
-
-    );
-
-}
-
-window.addEventListener(
-
-    "resize",
-
-    ()=>{
-
-        atualizarTamanhoMapa();
-
-    }
-
-);
-
-/*
-=========================================================
-LIMITES
-=========================================================
-*/
-
-function atualizarLimites(bounds){
-
-    if(!mapa){
-
-        return;
-
-    }
-
-    mapa.setMaxBounds(
-
-        bounds
-
-    );
-
-}
-
-/*
-=========================================================
-OBTER CENTRO
-=========================================================
-*/
-
-function obterCentroMapa(){
-
-    if(!mapa){
-
-        return null;
-
-    }
-
-    return mapa.getCenter();
+    return mapa;
 
 }
 
@@ -866,11 +482,11 @@ OBTER ZOOM
 =========================================================
 */
 
-function obterZoomMapa(){
+function obterZoom(){
 
     if(!mapa){
 
-        return null;
+        return CONFIG.zoomInicial;
 
     }
 
@@ -880,137 +496,94 @@ function obterZoomMapa(){
 
 /*
 =========================================================
-VERIFICAR CAMADA
+ALTERAR ZOOM
 =========================================================
 */
 
-function possuiCamada(camada){
+function definirZoom(zoom){
 
     if(!mapa){
 
-        return false;
+        return;
 
     }
 
-    return mapa.hasLayer(
-
-        camada
-
-    );
+    mapa.setZoom(zoom);
 
 }
+
 /*
 =========================================================
-LIMPAR CAMADAS SVG
+LIMITES
 =========================================================
 */
 
-function limparCamadasSVG(){
+function obterLimitesMapa(){
 
-    camadasSVG.forEach(
-
-        camada=>{
-
-            if(
-
-                mapa &&
-
-                mapa.hasLayer(
-
-                    camada
-
-                )
-
-            ){
-
-                mapa.removeLayer(
-
-                    camada
-
-                );
-
-            }
-
-        }
-
-    );
-
-    camadasSVG = [];
+    return mapa.getBounds();
 
 }
 
 /*
 =========================================================
-REDESENHAR MAPA
+REDIMENSIONAR
 =========================================================
 */
 
-function redesenharMapa(){
+function atualizarMapa(){
 
-    atualizarTamanhoMapa();
+    if(!mapa){
 
-    atualizarModoMapa();
+        return;
+
+    }
+
+    mapa.invalidateSize();
 
 }
 
 /*
 =========================================================
-ATUALIZAR CAMADAS
+EVENTOS
 =========================================================
 */
 
-function atualizarCamadasMapa(){
+window.addEventListener(
 
-    recarregarSVGs();
+    "resize",
 
-    atualizarModoMapa();
+    ()=>{
 
-}
+        atualizarMapa();
 
-/*
-=========================================================
-RECARREGAR MAPA
-=========================================================
-*/
+    }
 
-function recarregarMapa(){
-
-    atualizarCamadasMapa();
-
-    atualizarZoom();
-
-}
+);
 
 /*
 =========================================================
-API PÚBLICA
+API
 =========================================================
 */
 
 window.mapaAPI = {
 
+    obterMapa,
+
+    obterZoom,
+
+    definirZoom,
+
     centralizarMapa,
 
-    enquadrarMapa,
+    obterLimitesMapa,
 
-    atualizarLimites,
-
-    obterCentroMapa,
-
-    obterZoomMapa,
-
-    definirModoMapa,
-
-    atualizarCamadasMapa,
-
-    recarregarMapa,
-
-    redesenharMapa
+    atualizarMapa
 
 };
 
 /*
 =========================================================
-FIM DO ARQUIVO
+FIM
 =========================================================
 */
