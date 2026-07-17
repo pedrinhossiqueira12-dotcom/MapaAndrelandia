@@ -2,73 +2,25 @@
 =========================================================
 MAPA INTERATIVO DE ANDRELÂNDIA
 app.js
-Versão 2.0
+Versão 3.0
 =========================================================
 */
 
 /*
 =========================================================
-CONFIGURAÇÕES
+DADOS
 =========================================================
 */
-
-const CONFIG = {
-
-    cidade:"Andrelândia",
-
-    estado:"MG",
-
-    centro:[-21.74135,-44.30920],
-
-    zoomInicial:16,
-
-    zoomMinimo:14,
-
-    zoomMaximo:20,
-
-    animacao:0.6,
-
-    caminhos:{
-
-        locais:"data/locais.json",
-
-        comercios:"data/comercios.json",
-
-        hud:"img/interface/hud.svg",
-
-        overlay:"img/overlay/",
-
-        icones:"img/icones/"
-
-    }
-
-};
-
-/*
-=========================================================
-VARIÁVEIS
-=========================================================
-*/
-
-let mapa = null;
-
-let camadaSatelite = null;
-
-let camadaRuas = null;
-
-let camadasSVG = [];
-
-let mapaIlustrado = true;
-
-let marcadorUsuario = null;
-
-let circuloPrecisao = null;
-
-let marcadores = [];
 
 let locais = [];
 
 let comercios = [];
+
+/*
+=========================================================
+ESTADO DA INTERFACE
+=========================================================
+*/
 
 let pesquisaAberta = false;
 
@@ -82,17 +34,15 @@ ELEMENTOS
 
 let btnMenu;
 
-let btnSearch;
+let btnPesquisar;
 
-let btnLocate;
-
-let btnLayers;
+let btnGPS;
 
 let btnSatellite;
 
-let btnCloseSidebar;
+let btnFecharMenu;
 
-let sidebar;
+let menuLateral;
 
 let overlay;
 
@@ -114,98 +64,100 @@ document.addEventListener(
 
 );
 
-/*
-=========================================================
-INICIAR
-=========================================================
-*/
-
 async function iniciarSistema(){
 
     obterElementos();
 
     await carregarDados();
 
-    if(typeof iniciarMapa==="function"){
+    iniciarMapa();
 
-        iniciarMapa();
+    iniciarCamadas();
 
-    }
+    iniciarMarcadores();
 
-    if(typeof iniciarInterface==="function"){
+    iniciarGPS();
 
-        iniciarInterface();
+    iniciarPesquisa();
 
-    }
+    iniciarFiltros();
 
-    if(typeof iniciarPesquisa==="function"){
+    iniciarInterface();
 
-        iniciarPesquisa();
-
-    }
-
-    if(typeof iniciarFiltros==="function"){
-
-        iniciarFiltros();
-
-    }
-
-    if(typeof iniciarCamadas==="function"){
-
-        iniciarCamadas();
-
-    }
-
-    if(typeof iniciarGPS==="function"){
-
-        iniciarGPS();
-
-    }
-
-    if(typeof iniciarMarcadores==="function"){
-
-        iniciarMarcadores();
-
-    }
     if(typeof iniciarPopup==="function"){
 
-    iniciarPopup();
+        iniciarPopup();
 
     }
 
 }
-
 /*
 =========================================================
-ELEMENTOS
+OBTER ELEMENTOS
 =========================================================
 */
 
 function obterElementos(){
 
-    btnMenu = document.getElementById("btnMenu");
+    btnMenu = document.getElementById(
 
-    btnSearch = document.getElementById("btnPesquisar");
+        "btnMenu"
 
-    btnLocate = document.getElementById("btnGPS");
+    );
 
-    btnSatellite = document.getElementById("btnSatellite");
+    btnPesquisar = document.getElementById(
 
-    btnCloseSidebar = document.getElementById("fecharMenu");
+        "btnPesquisar"
 
-    sidebar = document.getElementById("menuLateral");
+    );
 
-    overlay = document.getElementById("overlay");
+    btnGPS = document.getElementById(
 
-    searchContainer = document.getElementById("searchContainer");
+        "btnGPS"
 
-    searchInput = document.getElementById("searchInput");
+    );
+
+    btnSatellite = document.getElementById(
+
+        "btnSatellite"
+
+    );
+
+    btnFecharMenu = document.getElementById(
+
+        "fecharMenu"
+
+    );
+
+    menuLateral = document.getElementById(
+
+        "menuLateral"
+
+    );
+
+    overlay = document.getElementById(
+
+        "overlay"
+
+    );
+
+    searchContainer = document.getElementById(
+
+        "searchContainer"
+
+    );
+
+    searchInput = document.getElementById(
+
+        "searchInput"
+
+    );
 
 }
 
 /*
 =========================================================
-CARREGAR JSON
+CARREGAR DADOS
 =========================================================
 */
 
@@ -213,47 +165,90 @@ async function carregarDados(){
 
     try{
 
-        const resposta = await fetch(CONFIG.caminhos.locais);
+        const resposta = await fetch(
 
-        if(resposta.ok){
+            "data/locais.json"
 
-            locais = await resposta.json();
+        );
+
+        if(
+
+            !resposta.ok
+
+        ){
+
+            throw new Error(
+
+                "locais.json"
+
+            );
 
         }
 
+        locais = await resposta.json();
+
     }catch(e){
 
-        console.warn("Erro ao carregar locais.json", e);
+        console.error(
+
+            "Erro ao carregar locais:",
+
+            e
+
+        );
+
+        locais = [];
 
     }
 
     try{
 
-        const resposta = await fetch(CONFIG.caminhos.comercios);
+        const resposta = await fetch(
 
-        if(resposta.ok){
+            "data/comercios.json"
 
-            comercios = await resposta.json();
+        );
+
+        if(
+
+            !resposta.ok
+
+        ){
+
+            throw new Error(
+
+                "comercios.json"
+
+            );
 
         }
 
+        comercios = await resposta.json();
+
     }catch(e){
 
-        console.warn("Erro ao carregar comercios.json");
+        console.error(
+
+            "Erro ao carregar comércios:",
+
+            e
+
+        );
+
+        comercios = [];
 
     }
 
 }
-
 /*
 =========================================================
-MENU
+MENU LATERAL
 =========================================================
 */
 
-function abrirSidebar(){
+function abrirMenu(){
 
-    if(!sidebar){
+    if(!menuLateral){
 
         return;
 
@@ -261,19 +256,17 @@ function abrirSidebar(){
 
     menuAberto = true;
 
-    sidebar.classList.add("open");
+    menuLateral.classList.add(
 
-    if(overlay){
+        "aberto"
 
-        overlay.classList.add("show");
-
-    }
+    );
 
 }
 
-function fecharSidebar(){
+function fecharMenu(){
 
-    if(!sidebar){
+    if(!menuLateral){
 
         return;
 
@@ -281,23 +274,21 @@ function fecharSidebar(){
 
     menuAberto = false;
 
-    sidebar.classList.remove("open");
+    menuLateral.classList.remove(
 
-    if(overlay){
+        "aberto"
 
-        overlay.classList.remove("show");
-
-    }
+    );
 
 }
 
-function alternarSidebar(){
+function alternarMenu(){
 
     menuAberto
 
-        ? fecharSidebar()
+        ? fecharMenu()
 
-        : abrirSidebar();
+        : abrirMenu();
 
 }
 
@@ -317,13 +308,21 @@ function abrirPesquisa(){
 
     pesquisaAberta = true;
 
-    searchContainer.classList.add("open");
+    searchContainer.classList.add(
+
+        "aberto"
+
+    );
 
     if(searchInput){
 
         setTimeout(
 
-            ()=>searchInput.focus(),
+            ()=>{
+
+                searchInput.focus();
+
+            },
 
             200
 
@@ -343,7 +342,11 @@ function fecharPesquisa(){
 
     pesquisaAberta = false;
 
-    searchContainer.classList.remove("open");
+    searchContainer.classList.remove(
+
+        "aberto"
+
+    );
 
     if(searchInput){
 
@@ -351,7 +354,13 @@ function fecharPesquisa(){
 
     }
 
-    if(typeof limparResultados === "function"){
+    if(
+
+        typeof limparResultados ===
+
+        "function"
+
+    ){
 
         limparResultados();
 
@@ -368,3 +377,136 @@ function alternarPesquisa(){
         : abrirPesquisa();
 
 }
+/*
+=========================================================
+EVENTOS
+=========================================================
+*/
+
+function iniciarInterface(){
+
+    if(btnMenu){
+
+        btnMenu.addEventListener(
+
+            "click",
+
+            alternarMenu
+
+        );
+
+    }
+
+    if(btnFecharMenu){
+
+        btnFecharMenu.addEventListener(
+
+            "click",
+
+            fecharMenu
+
+        );
+
+    }
+
+    if(btnPesquisar){
+
+        btnPesquisar.addEventListener(
+
+            "click",
+
+            alternarPesquisa
+
+        );
+
+    }
+
+    if(btnGPS){
+
+        btnGPS.addEventListener(
+
+            "click",
+
+            ()=>{
+
+                if(
+
+                    typeof centralizarUsuario ===
+
+                    "function"
+
+                ){
+
+                    centralizarUsuario();
+
+                }
+
+            }
+
+        );
+
+    }
+
+}
+
+/*
+=========================================================
+UTILITÁRIOS
+=========================================================
+*/
+
+function sistemaPronto(){
+
+    return (
+
+        mapa !== null
+
+    );
+
+}
+
+function obterLocais(){
+
+    return locais;
+
+}
+
+function obterComercios(){
+
+    return comercios;
+
+}
+
+/*
+=========================================================
+API
+=========================================================
+*/
+
+window.appAPI={
+
+    obterLocais,
+
+    obterComercios,
+
+    abrirMenu,
+
+    fecharMenu,
+
+    alternarMenu,
+
+    abrirPesquisa,
+
+    fecharPesquisa,
+
+    alternarPesquisa,
+
+    sistemaPronto
+
+};
+
+/*
+=========================================================
+FIM
+=========================================================
+*/
