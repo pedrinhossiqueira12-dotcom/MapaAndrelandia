@@ -2,9 +2,21 @@
 =========================================================
 MAPA INTERATIVO DE ANDRELÂNDIA
 camadas.js
-Versão 3.0
+Versão 4.0
 =========================================================
 */
+
+/*
+=========================================================
+MODOS
+=========================================================
+*/
+
+const MODO_PERGAMINHO = "pergaminho";
+
+const MODO_SATELITE = "satelite";
+
+let modoMapa = MODO_PERGAMINHO;
 
 /*
 =========================================================
@@ -30,11 +42,132 @@ function iniciarCamadas(){
 
         "click",
 
-        ()=>{
+        alternarModoMapa
 
-            alternarModoMapa();
+    );
 
-        }
+    aplicarModoMapa();
+
+}
+
+/*
+=========================================================
+ALTERNAR
+=========================================================
+*/
+
+function alternarModoMapa(){
+
+    modoMapa =
+
+        modoMapa===MODO_PERGAMINHO
+
+        ? MODO_SATELITE
+
+        : MODO_PERGAMINHO;
+
+    aplicarModoMapa();
+
+}
+/*
+=========================================================
+APLICAR MODO
+=========================================================
+*/
+
+function aplicarModoMapa(){
+
+    if(!mapa){
+
+        return;
+
+    }
+
+    if(modoMapa===MODO_PERGAMINHO){
+
+        ativarPergaminho();
+
+    }else{
+
+        ativarSatelite();
+
+    }
+
+    atualizarBotaoCamadas();
+
+}
+
+/*
+=========================================================
+PERGAMINHO
+=========================================================
+*/
+
+function ativarPergaminho(){
+
+    document.body.classList.add(
+
+        "modo-pergaminho"
+
+    );
+
+    document.body.classList.remove(
+
+        "modo-satelite"
+
+    );
+
+    if(
+
+        mapa.hasLayer(
+
+            camadaSatelite
+
+        )
+
+    ){
+
+        mapa.removeLayer(
+
+            camadaSatelite
+
+        );
+
+    }
+
+    adicionarCamada(
+
+        camadaPapel
+
+    );
+
+    adicionarCamada(
+
+        camadaBairros
+
+    );
+
+    adicionarCamada(
+
+        camadaVegetacao
+
+    );
+
+    adicionarCamada(
+
+        camadaMapa
+
+    );
+
+    adicionarCamada(
+
+        camadaNomesRuas
+
+    );
+
+    adicionarCamada(
+
+        camadaNomesBairros
 
     );
 
@@ -42,27 +175,123 @@ function iniciarCamadas(){
 
 /*
 =========================================================
-MOSTRAR SVG
+SATÉLITE
 =========================================================
 */
 
-function mostrarSVGMapa(){
+function ativarSatelite(){
 
-    mostrarSVGs();
+    document.body.classList.remove(
+
+        "modo-pergaminho"
+
+    );
+
+    document.body.classList.add(
+
+        "modo-satelite"
+
+    );
+
+    removerCamada(
+
+        camadaPapel
+
+    );
+
+    removerCamada(
+
+        camadaBairros
+
+    );
+
+    removerCamada(
+
+        camadaVegetacao
+
+    );
+
+    removerCamada(
+
+        camadaMapa
+
+    );
+
+    removerCamada(
+
+        camadaNomesRuas
+
+    );
+
+    removerCamada(
+
+        camadaNomesBairros
+
+    );
+
+    if(
+
+        !mapa.hasLayer(
+
+            camadaSatelite
+
+        )
+
+    ){
+
+        camadaSatelite.addTo(
+
+            mapa
+
+        );
+
+    }
+
+}
+/*
+=========================================================
+ADICIONAR CAMADA
+=========================================================
+*/
+
+function adicionarCamada(camada){
+
+    if(
+
+        camada &&
+
+        !mapa.hasLayer(camada)
+
+    ){
+
+        camada.addTo(mapa);
+
+    }
 
 }
 
 /*
 =========================================================
-OCULTAR SVG
+REMOVER CAMADA
 =========================================================
 */
 
-function ocultarSVGMapa(){
+function removerCamada(camada){
 
-    esconderSVGs();
+    if(
+
+        camada &&
+
+        mapa.hasLayer(camada)
+
+    ){
+
+        mapa.removeLayer(camada);
+
+    }
 
 }
+
 /*
 =========================================================
 UTILITÁRIOS
@@ -71,23 +300,19 @@ UTILITÁRIOS
 
 function mapaEstaEmPergaminho(){
 
-    return mapaIlustrado === true;
+    return modoMapa===MODO_PERGAMINHO;
 
 }
 
 function mapaEstaEmSatelite(){
 
-    return mapaIlustrado === false;
+    return modoMapa===MODO_SATELITE;
 
 }
 
 function obterModoMapa(){
 
-    return mapaIlustrado
-
-        ? "pergaminho"
-
-        : "satelite";
+    return modoMapa;
 
 }
 
@@ -101,9 +326,9 @@ function definirModo(modo){
 
     if(
 
-        modo !== "pergaminho" &&
+        modo!==MODO_PERGAMINHO &&
 
-        modo !== "satelite"
+        modo!==MODO_SATELITE
 
     ){
 
@@ -111,11 +336,9 @@ function definirModo(modo){
 
     }
 
-    definirModoMapa(
+    modoMapa = modo;
 
-        modo === "pergaminho"
-
-    );
+    aplicarModoMapa();
 
 }
 
@@ -146,26 +369,23 @@ function atualizarBotaoCamadas(){
         : "Modo Pergaminho";
 
 }
-
 /*
 =========================================================
 API
 =========================================================
 */
 
-window.camadasAPI = {
+window.camadasAPI={
 
-    mostrarSVGMapa,
+    alternarModoMapa,
 
-    ocultarSVGMapa,
-
-    mapaEstaEmPergaminho,
-
-    mapaEstaEmSatelite,
+    definirModo,
 
     obterModoMapa,
 
-    definirModo
+    mapaEstaEmPergaminho,
+
+    mapaEstaEmSatelite
 
 };
 
