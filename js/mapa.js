@@ -113,7 +113,6 @@ INICIAR MAPA
 */
 
 async function iniciarMapa(){
-async function iniciarMapa(){
 
     preloadImagens();
 
@@ -122,6 +121,14 @@ async function iniciarMapa(){
     criarPanes();
 
     criarCamadas();
+
+    mapa.off(
+
+        "zoomend",
+
+        atualizarOpacidade
+
+    );
 
     mapa.on(
 
@@ -153,7 +160,7 @@ function criarMapa(){
 
             zoomAnimation:true,
 
-            markerZoomAnimation:false
+            markerZoomAnimation:false,
     
             zoomControl:false,
 
@@ -654,49 +661,6 @@ function esperar(ms){
 }
 /*
 =========================================================
-CARREGAR PERGAMINHO
-=========================================================
-*/
-
-async function carregarPergaminho(){
-
-    removerCamada(
-
-        camadaSatelite
-
-    );
-
-    adicionarCamada(
-
-        camadaFundo
-
-    );
-
-    await esperar(20);
-
-    adicionarCamada(
-
-        camadaMapa
-
-    );
-
-    await esperar(20);
-
-    adicionarCamada(
-
-        camadaNomesRuas
-
-    );
-
-    adicionarCamada(
-
-        camadaNomesBairros
-
-    );
-
-}
-/*
-=========================================================
 CARREGAR SATÉLITE
 =========================================================
 */
@@ -712,21 +676,6 @@ async function carregarSatelite(){
     );
 
 }
-/*
-=========================================================
-ATUALIZAR OPACIDADE
-=========================================================
-*/
-
-function atualizarOpacidade(){
-
-    if(!mapaIlustrado){
-
-        return;
-
-    }
-
-    const zoom = mapa.getZoom();
 
     /*
     -----------------------------------------------------
@@ -974,18 +923,180 @@ async function carregarPergaminho(){
     atualizarOpacidade();
 
 }
-mapa.off(
+/*
+=========================================================
+OBTER MAPA
+=========================================================
+*/
 
-    "zoomend",
+function obterMapa(){
 
-    atualizarOpacidade
+    return mapa;
+
+}
+
+/*
+=========================================================
+OBTER ZOOM
+=========================================================
+*/
+
+function obterZoom(){
+
+    return mapa
+
+        ? mapa.getZoom()
+
+        : CONFIG.zoomInicial;
+
+}
+
+/*
+=========================================================
+DEFINIR ZOOM
+=========================================================
+*/
+
+function definirZoom(zoom){
+
+    if(!mapa){
+
+        return;
+
+    }
+
+    mapa.setZoom(
+
+        zoom
+
+    );
+
+}
+
+/*
+=========================================================
+CENTRALIZAR MAPA
+=========================================================
+*/
+
+function centralizarMapa(
+
+    latitude,
+
+    longitude,
+
+    zoom = mapa.getZoom()
+
+){
+
+    if(!mapa){
+
+        return;
+
+    }
+
+    mapa.flyTo(
+
+        [
+
+            latitude,
+
+            longitude
+
+        ],
+
+        zoom,
+
+        {
+
+            animate:true,
+
+            duration:CONFIG.animacao
+
+        }
+
+    );
+
+}
+
+/*
+=========================================================
+LIMITES
+=========================================================
+*/
+
+function obterLimitesMapa(){
+
+    return mapa.getBounds();
+
+}
+
+/*
+=========================================================
+ATUALIZAR MAPA
+=========================================================
+*/
+
+function atualizarMapa(){
+
+    if(!mapa){
+
+        return;
+
+    }
+
+    mapa.invalidateSize();
+
+}
+
+/*
+=========================================================
+REDIMENSIONAR
+=========================================================
+*/
+
+window.addEventListener(
+
+    "resize",
+
+    ()=>{
+
+        atualizarMapa();
+
+    }
 
 );
 
-mapa.on(
+/*
+=========================================================
+API
+=========================================================
+*/
 
-    "zoomend",
+window.mapaAPI = {
 
-    atualizarOpacidade
+    obterMapa,
 
-);
+    obterZoom,
+
+    definirZoom,
+
+    centralizarMapa,
+
+    obterLimitesMapa,
+
+    atualizarMapa,
+
+    alternarModoMapa,
+
+    ativarModoPergaminho,
+
+    ativarModoSatelite
+
+};
+
+/*
+=========================================================
+FIM
+=========================================================
+*/
