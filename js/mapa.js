@@ -171,12 +171,19 @@ function criarMapa(){
 
             zoomSnap:.25,
 
-            zoomDelta:.25
+            zoomDelta:.25,
+                
+            renderer:L.canvas()
 
         }
 
     );
+mapa.options.inertia = true;
 
+mapa.options.inertiaDeceleration = 2500;
+
+mapa.options.inertiaMaxSpeed = 1200;
+    
     mapa.setView(
 
         CONFIG.centro,
@@ -190,6 +197,11 @@ function criarMapa(){
         CONFIG.limites
 
     );
+    mapa.panInsideBounds(
+
+    CONFIG.limites
+
+);
 
 }
 /*
