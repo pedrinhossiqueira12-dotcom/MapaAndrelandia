@@ -120,7 +120,7 @@ async function iniciarMapa(){
 
     criarPanes();
 
-    criarCamadas();
+    await criarCamadas();
 
     mapa.off(
 
@@ -180,7 +180,6 @@ function criarMapa(){
 
             zoomDelta:.25,
                 
-            renderer:L.canvas()
 
         }
 
@@ -274,7 +273,7 @@ CRIAR CAMADAS
 =========================================================
 */
 
-function criarCamadas(){
+async function criarCamadas(){
 
     criarCamadaSatelite();
 
@@ -288,7 +287,7 @@ function criarCamadas(){
 
     otimizarCamadas();
 
-    ativarModoPergaminho();
+    await ativarModoPergaminho();
 
 }
 /*
@@ -355,9 +354,6 @@ function otimizarCamadas(){
 
                         "hidden";
 
-                    elemento.style.imageRendering =
-
-                        "auto";
 
                 }
 
@@ -835,32 +831,6 @@ function atualizarOpacidade(){
 
     /*
     ---------------------------------------------------------
-    NOMES DAS RUAS
-    ---------------------------------------------------------
-    */
-
-    if(zoom >= 17.75){
-
-        adicionarCamada(
-
-            camadaNomesRuas
-
-        );
-
-    }
-
-    else{
-
-        removerCamada(
-
-            camadaNomesRuas
-
-        );
-
-    }
-
-    /*
-    ---------------------------------------------------------
     NOMES DOS BAIRROS
     ---------------------------------------------------------
     */
@@ -917,6 +887,20 @@ async function carregarPergaminho(){
     adicionarCamada(
 
         camadaMapa
+
+    );
+
+    await esperar(15);
+
+    adicionarCamada(
+
+        camadaNomesRuas
+
+    );
+
+    adicionarCamada(
+
+        camadaNomesBairros
 
     );
 
