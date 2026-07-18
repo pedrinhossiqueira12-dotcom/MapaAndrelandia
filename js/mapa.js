@@ -8,7 +8,7 @@ Versão 6.0
 
 /*
 =========================================================
-VARIÁVEIS GLOBAIS
+VARIÁVEIS
 =========================================================
 */
 
@@ -16,17 +16,9 @@ let mapa = null;
 
 let mapaIlustrado = true;
 
-/*-------------------------------------------------------
-CAMADAS
--------------------------------------------------------*/
-
 let camadaSatelite = null;
 
-let camadaPapel = null;
-
-let camadaBairros = null;
-
-let camadaVegetacao = null;
+let camadaFundo = null;
 
 let camadaMapa = null;
 
@@ -34,22 +26,13 @@ let camadaNomesRuas = null;
 
 let camadaNomesBairros = null;
 
-/*-------------------------------------------------------
-GPS
--------------------------------------------------------*/
-
 let marcadorUsuario = null;
 
 let circuloPrecisao = null;
 
-/*-------------------------------------------------------
-MARCADORES
--------------------------------------------------------*/
-
 let grupoMarcadores = null;
 
 let marcadores = [];
-
 /*
 =========================================================
 CONFIGURAÇÃO
@@ -70,7 +53,9 @@ const CONFIG = {
 
     zoomMinimo:16,
 
-    zoomMaximo:20,
+    zoomMaximoPergaminho:20,
+
+    zoomMaximoSatelite:18,
 
     animacao:.40,
 
@@ -96,11 +81,7 @@ const CONFIG = {
 
     opacidade:{
 
-        papel:1,
-
-        bairros:.35,
-
-        vegetacao:.55,
+        fundo:1,
 
         mapa:1,
 
@@ -114,9 +95,9 @@ const CONFIG = {
 
         mapa:"img/mapa/",
 
-        interface:"img/interface/",
-
         icones:"img/icones/",
+
+        interface:"img/interface/",
 
         locais:"img/locais/"
 
@@ -124,29 +105,31 @@ const CONFIG = {
 
 };
 
-/*
-=========================================================
-LIMITES DOS OVERLAYS
-=========================================================
-*/
-
 const LIMITES_OVERLAY = CONFIG.limites;
-
 /*
 =========================================================
-INICIALIZAÇÃO
+INICIAR MAPA
 =========================================================
 */
 
 async function iniciarMapa(){
+async function iniciarMapa(){
+
+    preloadImagens();
 
     criarMapa();
 
     criarPanes();
 
-    criarGridPapel();
+    criarCamadas();
 
-    await criarCamadas();
+    mapa.on(
+
+        "zoomend",
+
+        atualizarOpacidade
+
+    );
 
 }
 /*
@@ -162,53 +145,6 @@ function criarMapa(){
         "map",
 
         {
-
-            /*---------------------------------------------
-            CONTROLES
-            ---------------------------------------------*/
-
-            zoomControl:false,
-
-            attributionControl:false,
-
-            preferCanvas:true,
-
-            /*---------------------------------------------
-            ZOOM
-            ---------------------------------------------*/
-
-            minZoom:CONFIG.zoomMinimo,
-
-            maxZoom:CONFIG.zoomMaximo,
-
-            zoomSnap:.25,
-
-            zoomDelta:.25,
-
-            /*---------------------------------------------
-            LIMITES
-            ---------------------------------------------*/
-
-            maxBounds:CONFIG.limites,
-
-            maxBoundsViscosity:1,
-
-            worldCopyJump:false,
-
-            noWrap:true,
-
-            /*---------------------------------------------
-            PERFORMANCE
-            ---------------------------------------------*/
-
-            inertia:true,
-
-            inertiaDeceleration:5000,
-
-            inertiaMaxSpeed:2500,
-
-            easeLinearity:.20,
-
             updateWhenIdle:true,
 
             updateWhenZooming:false,
@@ -217,11 +153,25 @@ function criarMapa(){
 
             zoomAnimation:true,
 
-            markerZoomAnimation:false,
+            markerZoomAnimation:false
+    
+            zoomControl:false,
 
-            wheelDebounceTime:30,
+            attributionControl:false,
 
-            renderer:L.canvas()
+            preferCanvas:true,
+
+            minZoom:CONFIG.zoomMinimo,
+
+            maxZoom:CONFIG.zoomMaximoPergaminho,
+
+            maxBounds:CONFIG.limites,
+
+            maxBoundsViscosity:1,
+
+            zoomSnap:.25,
+
+            zoomDelta:.25
 
         }
 
@@ -241,24 +191,6 @@ function criarMapa(){
 
     );
 
-    mapa.setMaxBounds(
-
-        CONFIG.limites
-
-    );
-
-    mapa.on(
-
-        "resize",
-
-        ()=>{
-
-            mapa.invalidateSize();
-
-        }
-
-    );
-
 }
 /*
 =========================================================
@@ -268,267 +200,53 @@ CRIAR PANES
 
 function criarPanes(){
 
-    /*-----------------------------------------------------
-    SATÉLITE
-    -----------------------------------------------------*/
+    mapa.createPane(
+
+        "fundo"
+
+    );
 
     mapa.createPane(
 
-        "satelite"
+        "mapa"
+
+    );
+
+    mapa.createPane(
+
+        "nomesRuas"
+
+    );
+
+    mapa.createPane(
+
+        "nomesBairros"
 
     );
 
     mapa.getPane(
 
-        "satelite"
-
-    ).style.zIndex = 100;
-
-    /*-----------------------------------------------------
-    PAPEL
-    -----------------------------------------------------*/
-
-    mapa.createPane(
-
-        "papel"
-
-    );
-
-    mapa.getPane(
-
-        "papel"
+        "fundo"
 
     ).style.zIndex = 200;
 
-    /*-----------------------------------------------------
-    BAIRROS
-    -----------------------------------------------------*/
-
-    mapa.createPane(
-
-        "bairros"
-
-    );
-
     mapa.getPane(
 
-        "bairros"
+        "mapa"
 
     ).style.zIndex = 210;
 
-    /*-----------------------------------------------------
-    VEGETAÇÃO
-    -----------------------------------------------------*/
-
-    mapa.createPane(
-
-        "vegetacao"
-
-    );
-
     mapa.getPane(
 
-        "vegetacao"
+        "nomesRuas"
 
     ).style.zIndex = 220;
 
-    /*-----------------------------------------------------
-    MAPA DESENHADO
-    -----------------------------------------------------*/
-
-    mapa.createPane(
-
-        "mapa"
-
-    );
-
     mapa.getPane(
 
-        "mapa"
+        "nomesBairros"
 
     ).style.zIndex = 230;
-
-    /*-----------------------------------------------------
-    NOMES DAS RUAS
-    -----------------------------------------------------*/
-
-    mapa.createPane(
-
-        "nomesRuas"
-
-    );
-
-    mapa.getPane(
-
-        "nomesRuas"
-
-    ).style.zIndex = 240;
-
-    /*-----------------------------------------------------
-    NOMES DOS BAIRROS
-    -----------------------------------------------------*/
-
-    mapa.createPane(
-
-        "nomesBairros"
-
-    );
-
-    mapa.getPane(
-
-        "nomesBairros"
-
-    ).style.zIndex = 250;
-
-    /*-----------------------------------------------------
-    MARCADORES
-    -----------------------------------------------------*/
-
-    mapa.createPane(
-
-        "marcadores"
-
-    );
-
-    mapa.getPane(
-
-        "marcadores"
-
-    ).style.zIndex = 300;
-
-    /*-----------------------------------------------------
-    GPS
-    -----------------------------------------------------*/
-
-    mapa.createPane(
-
-        "gps"
-
-    );
-
-    mapa.getPane(
-
-        "gps"
-
-    ).style.zIndex = 310;
-
-    /*-----------------------------------------------------
-    POPUPS
-    -----------------------------------------------------*/
-
-    mapa.createPane(
-
-        "popups"
-
-    );
-
-    mapa.getPane(
-
-        "popups"
-
-    ).style.zIndex = 400;
-
-}
-/*
-=========================================================
-GRID LAYER - PAPEL
-=========================================================
-*/
-
-const CamadaPapel = L.GridLayer.extend({
-
-    createTile:function(coords){
-
-        const tile = document.createElement(
-
-            "canvas"
-
-        );
-
-        const tamanho = this.getTileSize();
-
-        tile.width = tamanho.x;
-
-        tile.height = tamanho.y;
-
-        const contexto = tile.getContext(
-
-            "2d"
-
-        );
-
-        const imagem = new Image();
-
-        imagem.src =
-
-            CONFIG.caminhos.mapa +
-
-            "papel.webp";
-
-        imagem.onload = ()=>{
-
-            const padrao =
-
-                contexto.createPattern(
-
-                    imagem,
-
-                    "repeat"
-
-                );
-
-            contexto.fillStyle = padrao;
-
-            contexto.globalAlpha =
-
-                CONFIG.opacidade.papel;
-
-            contexto.fillRect(
-
-                0,
-
-                0,
-
-                tamanho.x,
-
-                tamanho.y
-
-            );
-
-        };
-
-        return tile;
-
-    }
-
-});
-/*
-=========================================================
-CRIAR CAMADA PAPEL
-=========================================================
-*/
-
-function criarGridPapel(){
-
-    camadaPapel = new CamadaPapel(
-
-        {
-
-            pane:"papel",
-
-            tileSize:512,
-
-            keepBuffer:2,
-
-            updateWhenIdle:true,
-
-            updateWhenZooming:false,
-
-            noWrap:true
-
-        }
-
-    );
 
 }
 /*
@@ -537,13 +255,11 @@ CRIAR CAMADAS
 =========================================================
 */
 
-async function criarCamadas(){
+function criarCamadas(){
 
     criarCamadaSatelite();
 
-    criarCamadaBairros();
-
-    criarCamadaVegetacao();
+    criarCamadaFundo();
 
     criarCamadaMapa();
 
@@ -551,22 +267,92 @@ async function criarCamadas(){
 
     criarCamadaNomesBairros();
 
-    if(mapaIlustrado){
+    otimizarCamadas();
 
-        await carregarPergaminho();
-
-    }
-
-    else{
-
-        await carregarSatelite();
-
-    }
+    ativarModoPergaminho();
 
 }
 /*
 =========================================================
-CRIAR CAMADA SATÉLITE
+OTIMIZAR CAMADAS
+=========================================================
+*/
+
+function otimizarCamadas(){
+
+    const camadas = [
+
+        camadaFundo,
+
+        camadaMapa,
+
+        camadaNomesRuas,
+
+        camadaNomesBairros
+
+    ];
+
+    camadas.forEach(
+
+        camada=>{
+
+            if(!camada){
+
+                return;
+
+            }
+
+            camada.on(
+
+                "add",
+
+                ()=>{
+
+                    const elemento = camada.getElement();
+
+                    if(!elemento){
+
+                        return;
+
+                    }
+
+                    elemento.style.pointerEvents =
+
+                        "none";
+
+                    elemento.style.userSelect =
+
+                        "none";
+
+                    elemento.style.willChange =
+
+                        "transform";
+
+                    elemento.style.transformOrigin =
+
+                        "center center";
+
+                    elemento.style.backfaceVisibility =
+
+                        "hidden";
+
+                    elemento.style.imageRendering =
+
+                        "auto";
+
+                }
+
+            );
+
+        }
+
+    );
+
+}
+
+/*
+=========================================================
+CAMADA SATÉLITE
 =========================================================
 */
 
@@ -578,19 +364,21 @@ function criarCamadaSatelite(){
 
         {
 
-            pane:"satelite",
-
             maxZoom:20,
 
             crossOrigin:true,
 
-            keepBuffer:2,
+            keepBuffer:1,
 
             updateWhenIdle:true,
 
             updateWhenZooming:false,
 
-            noWrap:true
+            noWrap:true,
+
+            unloadInvisibleTiles:true,
+
+            reuseTiles:true
 
         }
 
@@ -599,25 +387,60 @@ function criarCamadaSatelite(){
 }
 /*
 =========================================================
-CRIAR CAMADA BAIRROS
+PRÉ-CARREGAR IMAGENS
 =========================================================
 */
 
-function criarCamadaBairros(){
+function preloadImagens(){
 
-    camadaBairros = L.imageOverlay(
+    [
+
+        "fundo.png",
+
+        "mapa.svg",
+
+        "nomes-ruas.svg",
+
+        "nomes-bairros.svg"
+
+    ].forEach(
+
+        arquivo=>{
+
+            const imagem = new Image();
+
+            imagem.src =
+
+                CONFIG.caminhos.mapa +
+
+                arquivo;
+
+        }
+
+    );
+
+}
+/*
+=========================================================
+CAMADA FUNDO
+=========================================================
+*/
+
+function criarCamadaFundo(){
+
+    camadaFundo = L.imageOverlay(
 
         CONFIG.caminhos.mapa +
 
-        "bairros.svg",
+        "fundo.png",
 
         LIMITES_OVERLAY,
 
         {
 
-            pane:"bairros",
+            pane:"fundo",
 
-            opacity:CONFIG.opacidade.bairros,
+            opacity:CONFIG.opacidade.fundo,
 
             interactive:false
 
@@ -628,36 +451,7 @@ function criarCamadaBairros(){
 }
 /*
 =========================================================
-CRIAR CAMADA VEGETAÇÃO
-=========================================================
-*/
-
-function criarCamadaVegetacao(){
-
-    camadaVegetacao = L.imageOverlay(
-
-        CONFIG.caminhos.mapa +
-
-        "vegetacao.svg",
-
-        LIMITES_OVERLAY,
-
-        {
-
-            pane:"vegetacao",
-
-            opacity:CONFIG.opacidade.vegetacao,
-
-            interactive:false
-
-        }
-
-    );
-
-}
-/*
-=========================================================
-CRIAR CAMADA MAPA
+CAMADA MAPA
 =========================================================
 */
 
@@ -686,7 +480,7 @@ function criarCamadaMapa(){
 }
 /*
 =========================================================
-CRIAR CAMADA NOMES DAS RUAS
+CAMADA NOMES DAS RUAS
 =========================================================
 */
 
@@ -715,7 +509,7 @@ function criarCamadaNomesRuas(){
 }
 /*
 =========================================================
-CRIAR CAMADA NOMES DOS BAIRROS
+CAMADA NOMES DOS BAIRROS
 =========================================================
 */
 
@@ -802,19 +596,7 @@ function removerCamadasIlustradas(){
 
     removerCamada(
 
-        camadaPapel
-
-    );
-
-    removerCamada(
-
-        camadaBairros
-
-    );
-
-    removerCamada(
-
-        camadaVegetacao
+        camadaFundo
 
     );
 
@@ -874,33 +656,19 @@ async function carregarPergaminho(){
 
     adicionarCamada(
 
+        camadaFundo
+
+    );
+
+    await esperar(20);
+
+    adicionarCamada(
+
         camadaMapa
 
     );
 
-    await esperar(30);
-
-    adicionarCamada(
-
-        camadaPapel
-
-    );
-
-    await esperar(30);
-
-    adicionarCamada(
-
-        camadaVegetacao
-
-    );
-
-    adicionarCamada(
-
-        camadaBairros
-
-    );
-
-    await esperar(30);
+    await esperar(20);
 
     adicionarCamada(
 
@@ -934,7 +702,7 @@ async function carregarSatelite(){
 }
 /*
 =========================================================
-ATUALIZAR OPACIDADE POR ZOOM
+ATUALIZAR OPACIDADE
 =========================================================
 */
 
@@ -949,9 +717,9 @@ function atualizarOpacidade(){
     const zoom = mapa.getZoom();
 
     /*
-    -----------------------------------------
+    -----------------------------------------------------
     NOMES DAS RUAS
-    -----------------------------------------
+    -----------------------------------------------------
     */
 
     if(zoom >= 18){
@@ -962,7 +730,7 @@ function atualizarOpacidade(){
 
     else if(zoom >= 17){
 
-        camadaNomesRuas.setOpacity(.60);
+        camadaNomesRuas.setOpacity(.55);
 
     }
 
@@ -973,9 +741,9 @@ function atualizarOpacidade(){
     }
 
     /*
-    -----------------------------------------
+    -----------------------------------------------------
     NOMES DOS BAIRROS
-    -----------------------------------------
+    -----------------------------------------------------
     */
 
     if(zoom >= 20){
@@ -984,21 +752,21 @@ function atualizarOpacidade(){
 
     }
 
-    else if(zoom >= 19){
-
-        camadaNomesBairros.setOpacity(.40);
-
-    }
-
-    else if(zoom >= 17){
+    else if(zoom >= 18){
 
         camadaNomesBairros.setOpacity(1);
 
     }
 
+    else if(zoom >= 17){
+
+        camadaNomesBairros.setOpacity(.70);
+
+    }
+
     else{
 
-        camadaNomesBairros.setOpacity(.30);
+        camadaNomesBairros.setOpacity(0);
 
     }
 
@@ -1012,6 +780,12 @@ ATIVAR PERGAMINHO
 async function ativarModoPergaminho(){
 
     mapaIlustrado = true;
+
+    mapa.setMaxZoom(
+
+        CONFIG.zoomMaximoPergaminho
+
+    );
 
     await carregarPergaminho();
 
@@ -1039,6 +813,12 @@ ATIVAR SATÉLITE
 async function ativarModoSatelite(){
 
     mapaIlustrado = false;
+
+    mapa.setMaxZoom(
+
+        CONFIG.zoomMaximoSatelite
+
+    );
 
     await carregarSatelite();
 
@@ -1076,203 +856,124 @@ async function alternarModoMapa(){
     }
 
 }
-async function iniciarMapa(){
-
-    criarMapa();
-
-    criarPanes();
-
-    criarGridPapel();
-
-    await criarCamadas();
-
-    mapa.on(
-
-        "zoomend",
-
-        atualizarOpacidade
-
-    );
-
-}
 /*
 =========================================================
-CENTRALIZAR MAPA
+ATUALIZAR VISIBILIDADE POR ZOOM
 =========================================================
 */
 
-function centralizarMapa(
+function atualizarOpacidade(){
 
-    latitude,
-
-    longitude,
-
-    zoom = mapa.getZoom()
-
-){
-
-    if(!mapa){
+    if(!mapaIlustrado){
 
         return;
 
     }
 
-    mapa.flyTo(
+    const zoom = mapa.getZoom();
 
-        [
+    /*
+    ---------------------------------------------------------
+    NOMES DAS RUAS
+    ---------------------------------------------------------
+    */
 
-            latitude,
+    if(zoom >= 17.75){
 
-            longitude
+        adicionarCamada(
 
-        ],
+            camadaNomesRuas
 
-        zoom,
+        );
 
-        {
+    }
 
-            animate:true,
+    else{
 
-            duration:CONFIG.animacao
+        removerCamada(
 
-        }
+            camadaNomesRuas
+
+        );
+
+    }
+
+    /*
+    ---------------------------------------------------------
+    NOMES DOS BAIRROS
+    ---------------------------------------------------------
+    */
+
+    if(
+
+        zoom >= 17 &&
+
+        zoom < 19.75
+
+    ){
+
+        adicionarCamada(
+
+            camadaNomesBairros
+
+        );
+
+    }
+
+    else{
+
+        removerCamada(
+
+            camadaNomesBairros
+
+        );
+
+    }
+
+}
+/*
+=========================================================
+CARREGAR PERGAMINHO
+=========================================================
+*/
+
+async function carregarPergaminho(){
+
+    removerCamada(
+
+        camadaSatelite
 
     );
 
-}
-/*
-=========================================================
-OBTER MAPA
-=========================================================
-*/
+    adicionarCamada(
 
-function obterMapa(){
-
-    return mapa;
-
-}
-/*
-=========================================================
-OBTER ZOOM
-=========================================================
-*/
-
-function obterZoom(){
-
-    if(!mapa){
-
-        return CONFIG.zoomInicial;
-
-    }
-
-    return mapa.getZoom();
-
-}
-/*
-=========================================================
-DEFINIR ZOOM
-=========================================================
-*/
-
-function definirZoom(
-
-    zoom
-
-){
-
-    if(!mapa){
-
-        return;
-
-    }
-
-    mapa.setZoom(
-
-        zoom
+        camadaFundo
 
     );
 
-}
-/*
-=========================================================
-OBTER LIMITES
-=========================================================
-*/
+    await esperar(15);
 
-function obterLimitesMapa(){
+    adicionarCamada(
 
-    if(!mapa){
+        camadaMapa
 
-        return null;
+    );
 
-    }
-
-    return mapa.getBounds();
+    atualizarOpacidade();
 
 }
-/*
-=========================================================
-ATUALIZAR MAPA
-=========================================================
-*/
+mapa.off(
 
-function atualizarMapa(){
+    "zoomend",
 
-    if(!mapa){
-
-        return;
-
-    }
-
-    mapa.invalidateSize();
-
-}
-/*
-=========================================================
-REDIMENSIONAMENTO
-=========================================================
-*/
-
-window.addEventListener(
-
-    "resize",
-
-    ()=>{
-
-        atualizarMapa();
-
-    }
+    atualizarOpacidade
 
 );
-/*
-=========================================================
-API
-=========================================================
-*/
 
-window.mapaAPI = {
+mapa.on(
 
-    obterMapa,
+    "zoomend",
 
-    obterZoom,
+    atualizarOpacidade
 
-    definirZoom,
-
-    centralizarMapa,
-
-    obterLimitesMapa,
-
-    atualizarMapa,
-
-    alternarModoMapa,
-
-    ativarModoPergaminho,
-
-    ativarModoSatelite
-
-};
-/*
-=========================================================
-FIM
-=========================================================
-*/
+);
