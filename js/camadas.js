@@ -2,7 +2,7 @@
 =========================================================
 MAPA INTERATIVO DE ANDRELÂNDIA
 camadas.js
-Versão 4.0
+Versão 5.0
 =========================================================
 */
 
@@ -26,25 +26,19 @@ INICIAR
 
 function iniciarCamadas(){
 
-    const botao = document.getElementById(
+    const botao = document.getElementById("btnSatellite");
 
-        "btnSatellite"
+    if(botao){
 
-    );
+        botao.addEventListener(
 
-    if(!botao){
+            "click",
 
-        return;
+            alternarModoMapa
+
+        );
 
     }
-
-    botao.addEventListener(
-
-        "click",
-
-        alternarModoMapa
-
-    );
 
     aplicarModoMapa();
 
@@ -69,9 +63,10 @@ function alternarModoMapa(){
     aplicarModoMapa();
 
 }
+
 /*
 =========================================================
-APLICAR MODO
+APLICAR
 =========================================================
 */
 
@@ -87,7 +82,9 @@ function aplicarModoMapa(){
 
         ativarPergaminho();
 
-    }else{
+    }
+
+    else{
 
         ativarSatelite();
 
@@ -117,59 +114,13 @@ function ativarPergaminho(){
 
     );
 
-    if(
+    removerCamada(camadaSatelite);
 
-        mapa.hasLayer(
+    adicionarCamada(camadaFundo);
 
-            camadaSatelite
+    adicionarCamada(camadaMapa);
 
-        )
-
-    ){
-
-        mapa.removeLayer(
-
-            camadaSatelite
-
-        );
-
-    }
-
-    adicionarCamada(
-
-        camadaPapel
-
-    );
-
-    adicionarCamada(
-
-        camadaBairros
-
-    );
-
-    adicionarCamada(
-
-        camadaVegetacao
-
-    );
-
-    adicionarCamada(
-
-        camadaMapa
-
-    );
-
-    adicionarCamada(
-
-        camadaNomesRuas
-
-    );
-
-    adicionarCamada(
-
-        camadaNomesBairros
-
-    );
+    atualizarOpacidade();
 
 }
 
@@ -193,102 +144,45 @@ function ativarSatelite(){
 
     );
 
-    removerCamada(
+    removerCamada(camadaFundo);
 
-        camadaPapel
+    removerCamada(camadaMapa);
 
-    );
+    removerCamada(camadaNomesRuas);
 
-    removerCamada(
+    removerCamada(camadaNomesBairros);
 
-        camadaBairros
-
-    );
-
-    removerCamada(
-
-        camadaVegetacao
-
-    );
-
-    removerCamada(
-
-        camadaMapa
-
-    );
-
-    removerCamada(
-
-        camadaNomesRuas
-
-    );
-
-    removerCamada(
-
-        camadaNomesBairros
-
-    );
-
-    if(
-
-        !mapa.hasLayer(
-
-            camadaSatelite
-
-        )
-
-    ){
-
-        camadaSatelite.addTo(
-
-            mapa
-
-        );
-
-    }
-
-}
-/*
-=========================================================
-ADICIONAR CAMADA
-=========================================================
-*/
-
-function adicionarCamada(camada){
-
-    if(
-
-        camada &&
-
-        !mapa.hasLayer(camada)
-
-    ){
-
-        camada.addTo(mapa);
-
-    }
+    adicionarCamada(camadaSatelite);
 
 }
 
 /*
 =========================================================
-REMOVER CAMADA
+BOTÃO
 =========================================================
 */
 
-function removerCamada(camada){
+function atualizarBotaoCamadas(){
 
-    if(
+    const botao = document.getElementById(
 
-        camada &&
+        "btnSatellite"
 
-        mapa.hasLayer(camada)
+    );
 
-    ){
+    if(!botao){
 
-        mapa.removeLayer(camada);
+        return;
 
     }
+
+    botao.title =
+
+        modoMapa===MODO_PERGAMINHO
+
+        ? "Modo Satélite"
+
+        : "Modo Pergaminho";
 
 }
 
@@ -316,12 +210,6 @@ function obterModoMapa(){
 
 }
 
-/*
-=========================================================
-DEFINIR MODO
-=========================================================
-*/
-
 function definirModo(modo){
 
     if(
@@ -342,33 +230,6 @@ function definirModo(modo){
 
 }
 
-/*
-=========================================================
-ATUALIZAR BOTÃO
-=========================================================
-*/
-
-function atualizarBotaoCamadas(){
-
-    const botao = document.getElementById(
-
-        "btnSatellite"
-
-    );
-
-    if(!botao){
-
-        return;
-
-    }
-
-    botao.title = mapaEstaEmPergaminho()
-
-        ? "Modo Satélite"
-
-        : "Modo Pergaminho";
-
-}
 /*
 =========================================================
 API
