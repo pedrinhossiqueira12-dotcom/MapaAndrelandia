@@ -152,9 +152,6 @@ function criarMapa(){
         "map",
 
         {
-            updateWhenIdle:true,
-
-            updateWhenZooming:false,
 
             fadeAnimation:false,
 
@@ -774,16 +771,6 @@ function atualizarOpacidade(){
 
     const zoom = mapa.getZoom();
 
-    function atualizarOpacidade(){
-
-    if(!mapaIlustrado){
-
-        return;
-
-    }
-
-    const zoom = mapa.getZoom();
-
     /*
     ---------------------------------------------------------
     NOMES DAS RUAS
@@ -792,17 +779,11 @@ function atualizarOpacidade(){
 
     if(zoom >= 17.75){
 
-        adicionarCamada(
-            camadaNomesRuas
-        );
+        adicionarCamada(camadaNomesRuas);
 
-    }
+    }else{
 
-    else{
-
-        removerCamada(
-            camadaNomesRuas
-        );
+        removerCamada(camadaNomesRuas);
 
     }
 
@@ -812,24 +793,13 @@ function atualizarOpacidade(){
     ---------------------------------------------------------
     */
 
-    if(
+    if(zoom >= 17 && zoom < 19.75){
 
-        zoom >= 17 &&
-        zoom < 19.75
+        adicionarCamada(camadaNomesBairros);
 
-    ){
+    }else{
 
-        adicionarCamada(
-            camadaNomesBairros
-        );
-
-    }
-
-    else{
-
-        removerCamada(
-            camadaNomesBairros
-        );
+        removerCamada(camadaNomesBairros);
 
     }
 
