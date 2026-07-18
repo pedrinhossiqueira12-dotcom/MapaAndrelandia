@@ -68,12 +68,12 @@ async function iniciarSistema(){
 
     obterElementos();
 
-    await carregarDados();
-
-    iniciarMapa();
-
+   await carregarDados();
+    
+    await iniciarMapa();
+    
     iniciarCamadas();
-
+    
     iniciarMarcadores();
 
     iniciarGPS();
