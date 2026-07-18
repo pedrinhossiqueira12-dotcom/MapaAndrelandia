@@ -12,7 +12,7 @@ VARIÁVEIS
 =========================================================
 */
 
-let grupoMarcadores = null;
+grupoMarcadores = L.layerGroup();
 
 let marcadorSelecionado = null;
 
