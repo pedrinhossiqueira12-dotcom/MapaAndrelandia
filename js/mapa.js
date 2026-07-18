@@ -673,61 +673,6 @@ async function carregarSatelite(){
 
 }
 
-    /*
-    -----------------------------------------------------
-    NOMES DAS RUAS
-    -----------------------------------------------------
-    */
-
-    if(zoom >= 18){
-
-        camadaNomesRuas.setOpacity(1);
-
-    }
-
-    else if(zoom >= 17){
-
-        camadaNomesRuas.setOpacity(.55);
-
-    }
-
-    else{
-
-        camadaNomesRuas.setOpacity(0);
-
-    }
-
-    /*
-    -----------------------------------------------------
-    NOMES DOS BAIRROS
-    -----------------------------------------------------
-    */
-
-    if(zoom >= 20){
-
-        camadaNomesBairros.setOpacity(0);
-
-    }
-
-    else if(zoom >= 18){
-
-        camadaNomesBairros.setOpacity(1);
-
-    }
-
-    else if(zoom >= 17){
-
-        camadaNomesBairros.setOpacity(.70);
-
-    }
-
-    else{
-
-        camadaNomesBairros.setOpacity(0);
-
-    }
-
-}
 /*
 =========================================================
 ATIVAR PERGAMINHO
@@ -829,6 +774,38 @@ function atualizarOpacidade(){
 
     const zoom = mapa.getZoom();
 
+    function atualizarOpacidade(){
+
+    if(!mapaIlustrado){
+
+        return;
+
+    }
+
+    const zoom = mapa.getZoom();
+
+    /*
+    ---------------------------------------------------------
+    NOMES DAS RUAS
+    ---------------------------------------------------------
+    */
+
+    if(zoom >= 17.75){
+
+        adicionarCamada(
+            camadaNomesRuas
+        );
+
+    }
+
+    else{
+
+        removerCamada(
+            camadaNomesRuas
+        );
+
+    }
+
     /*
     ---------------------------------------------------------
     NOMES DOS BAIRROS
@@ -838,15 +815,12 @@ function atualizarOpacidade(){
     if(
 
         zoom >= 17 &&
-
         zoom < 19.75
 
     ){
 
         adicionarCamada(
-
             camadaNomesBairros
-
         );
 
     }
@@ -854,9 +828,7 @@ function atualizarOpacidade(){
     else{
 
         removerCamada(
-
             camadaNomesBairros
-
         );
 
     }
