@@ -40,15 +40,8 @@ CONFIGURAÇÃO
 */
 
 const CONFIG = {
-
-    centro:[
-
-        -21.74135,
-
-        -44.30920
-
-    ],
-
+    
+    mapa.fitBounds(LIMITES_OVERLAY);
     zoomInicial:16,
 
     zoomMinimo:16,
@@ -59,25 +52,17 @@ const CONFIG = {
 
     animacao:.40,
 
-    limites:[
+   limites: L.latLngBounds(
 
-        [
+    L.CRS.EPSG3857.unproject(
+        L.point(-4948316.5800,-2489080.6150)
+    ),
 
-            -21.731000,
+    L.CRS.EPSG3857.unproject(
+        L.point(-4923006.5972,-2473277.5588)
+    )
 
-            -44.320000
-
-        ],
-
-        [
-
-            -21.751000,
-
-            -44.296000
-
-        ]
-
-    ],
+),
 
     opacidade:{
 
@@ -118,7 +103,7 @@ async function iniciarMapa(){
 
     criarMapa();
 
-    criarPanes();
+    criarpanInsideBoundses();
 
     await criarCamadas();
 
@@ -195,27 +180,34 @@ mapa.options.inertiaMaxSpeed = 1200;
 
     );
 
-    mapa.fitBounds(
+mapa.fitBounds(
 
-        CONFIG.limites
+    LIMITES_OVERLAY,
 
-    );
-    mapa.panInsideBounds(
+    {
 
-    CONFIG.limites
+        padding:[0,0]
+
+    }
+
+);
+
+mapa.setMaxBounds(
+
+    LIMITES_OVERLAY
 
 );
 
 }
 /*
 =========================================================
-CRIAR PANES
+CRIAR panInsideBoundsES
 =========================================================
 */
 
-function criarPanes(){
+function criarpanInsideBoundses(){
 
-    mapa.createPane(
+    mapa.createpanInsideBoundse(
 
         "fundo"
 
