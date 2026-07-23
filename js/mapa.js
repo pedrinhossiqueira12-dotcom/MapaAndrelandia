@@ -1,50 +1,82 @@
 /*
 =========================================================
+MAPA INTERATIVO DE ANDRELÂNDIA
+mapa.js
+Versão 7.0
+=========================================================
+*/
+
+/*
+=========================================================
+VARIÁVEIS
+=========================================================
+*/
+
+let mapa = null;
+
+let mapaIlustrado = true;
+
+let camadaSatelite = null;
+
+let camadaFundo = null;
+
+let camadaMapa = null;
+
+let camadaNomesRuas = null;
+
+let camadaNomesBairros = null;
+
+let marcadorUsuario = null;
+
+let circuloPrecisao = null;
+
+let grupoMarcadores = null;
+
+let marcadores = [];
+
+/*
+=========================================================
 CONFIGURAÇÃO
 =========================================================
 */
 
 const CONFIG = {
 
-    centro: [
-        -21.74135,
-        -44.30920
+    centro:[
+        -21.747040,
+        -44.337760
     ],
 
-    zoomInicial: 16,
+    zoomInicial:16,
 
-    zoomMinimo: 16,
+    zoomMinimo:16,
 
-    zoomMaximoPergaminho: 20,
+    zoomMaximoPergaminho:20,
 
-    zoomMaximoSatelite: 20,
+    zoomMaximoSatelite:18,
 
-    animacao: 0.40,
+    animacao:.40,
 
     /*
     =====================================================
-    LIMITES REAIS DO MAPA
-    (EPSG:3857 convertido pelo Leaflet)
+    LIMITES GEOREFERENCIADOS
+    EPSG:4326
     =====================================================
     */
 
-    limites: L.latLngBounds(
+    limites:[
 
-        L.CRS.EPSG3857.unproject(
-            L.point(
-                -4948316.5800,
-                -2489080.6150
-            )
-        ),
+        [
+            -21.812963563,
+            -44.451251796
+        ],
 
-        L.CRS.EPSG3857.unproject(
-            L.point(
-                -4923006.5972,
-                -2473277.5588
-            )
-        )
+        [
+            -21.681117919,
+            -44.224268434
+        ]
 
-    ),
+    ],
 
     opacidade:{
 
@@ -72,13 +104,36 @@ const CONFIG = {
 
 };
 
+const LIMITES_OVERLAY = CONFIG.limites;
+
 /*
 =========================================================
-LIMITES DO OVERLAY
+INICIAR MAPA
 =========================================================
 */
 
-const LIMITES_OVERLAY = CONFIG.limites;
+async function iniciarMapa(){
+
+    preloadImagens();
+
+    criarMapa();
+
+    criarPanes();
+
+    await criarCamadas();
+
+    mapa.off(
+        "zoomend",
+        atualizarOpacidade
+    );
+
+    mapa.on(
+        "zoomend",
+        atualizarOpacidade
+    );
+
+}
+
 /*
 =========================================================
 CRIAR MAPA
@@ -105,11 +160,9 @@ function criarMapa(){
 
             markerZoomAnimation:false,
 
-            inertia:true,
+            zoomSnap:.25,
 
-            inertiaDeceleration:2500,
-
-            inertiaMaxSpeed:1200,
+            zoomDelta:.25,
 
             minZoom:CONFIG.zoomMinimo,
 
@@ -119,149 +172,64 @@ function criarMapa(){
 
             maxBoundsViscosity:1,
 
-            zoomSnap:0.25,
+            inertia:true,
 
-            zoomDelta:0.25,
+            inertiaDeceleration:2500,
 
-            worldCopyJump:false,
-
-            maxBoundsViscosity:1
+            inertiaMaxSpeed:1200
 
         }
+
+    );
+
+    mapa.setView(
+
+        CONFIG.centro,
+
+        CONFIG.zoomInicial
 
     );
 
     mapa.fitBounds(
 
-        CONFIG.limites,
+        CONFIG.limites
 
-        {
+    );
 
-            animate:false,
+    mapa.panInsideBounds(
 
-            padding:[0,0]
-
-        }
+        CONFIG.limites
 
     );
 
 }
+
 /*
 =========================================================
-CAMADA FUNDO
+CRIAR PANES
 =========================================================
 */
 
-function criarCamadaFundo(){
+function criarPanes(){
 
-    camadaFundo = L.imageOverlay(
+    mapa.createPane("fundo");
 
-        CONFIG.caminhos.mapa + "fundo.png",
+    mapa.createPane("mapa");
 
-        LIMITES_OVERLAY,
+    mapa.createPane("nomesRuas");
 
-        {
+    mapa.createPane("nomesBairros");
 
-            pane:"fundo",
+    mapa.getPane("fundo").style.zIndex = 200;
 
-            opacity:1,
+    mapa.getPane("mapa").style.zIndex = 210;
 
-            interactive:false,
+    mapa.getPane("nomesRuas").style.zIndex = 220;
 
-            crossOrigin:true
-
-        }
-
-    );
+    mapa.getPane("nomesBairros").style.zIndex = 230;
 
 }
-/*
-=========================================================
-CAMADA MAPA
-=========================================================
-*/
 
-function criarCamadaMapa(){
-
-    camadaMapa = L.imageOverlay(
-
-        CONFIG.caminhos.mapa + "mapa.svg",
-
-        LIMITES_OVERLAY,
-
-        {
-
-            pane:"mapa",
-
-            opacity:1,
-
-            interactive:false,
-
-            crossOrigin:true
-
-        }
-
-    );
-
-}
-/*
-=========================================================
-CAMADA NOMES DAS RUAS
-=========================================================
-*/
-
-function criarCamadaNomesRuas(){
-
-    camadaNomesRuas = L.imageOverlay(
-
-        CONFIG.caminhos.mapa + "nomes-ruas.svg",
-
-        LIMITES_OVERLAY,
-
-        {
-
-            pane:"nomesRuas",
-
-            opacity:1,
-
-            interactive:false,
-
-            crossOrigin:true
-
-        }
-
-    );
-
-}
-/*
-=========================================================
-CAMADA NOMES DOS BAIRROS
-=========================================================
-*/
-
-function criarCamadaNomesBairros(){
-
-    camadaNomesBairros = L.imageOverlay(
-
-        CONFIG.caminhos.mapa + "nomes-bairros.svg",
-
-        LIMITES_OVERLAY,
-
-        {
-
-            pane:"nomesBairros",
-
-            opacity:1,
-
-            interactive:false,
-
-            crossOrigin:true
-
-        }
-
-    );
-
-}
 /*
 =========================================================
 CRIAR CAMADAS
@@ -288,13 +256,13 @@ async function criarCamadas(){
 
 /*
 =========================================================
-OTIMIZAÇÃO DAS CAMADAS
+OTIMIZAR CAMADAS
 =========================================================
 */
 
 function otimizarCamadas(){
 
-    [
+    const camadas = [
 
         camadaFundo,
 
@@ -304,25 +272,35 @@ function otimizarCamadas(){
 
         camadaNomesBairros
 
-    ].forEach(camada=>{
+    ];
 
-        if(!camada) return;
+    camadas.forEach(camada=>{
+
+        if(!camada){
+
+            return;
+
+        }
 
         camada.on("add",()=>{
 
             const elemento = camada.getElement();
 
-            if(!elemento) return;
+            if(!elemento){
+
+                return;
+
+            }
 
             elemento.style.pointerEvents="none";
 
             elemento.style.userSelect="none";
 
+            elemento.style.willChange="transform";
+
             elemento.style.transformOrigin="center center";
 
             elemento.style.backfaceVisibility="hidden";
-
-            elemento.style.willChange="transform";
 
         });
 
@@ -330,6 +308,181 @@ function otimizarCamadas(){
 
 }
 
+/*
+=========================================================
+PRÉ-CARREGAR IMAGENS
+=========================================================
+*/
+
+function preloadImagens(){
+
+    [
+
+        "fundo.png",
+
+        "mapa.svg",
+
+        "nomes-ruas.svg",
+
+        "nomes-bairros.svg"
+
+    ].forEach(arquivo=>{
+
+        const imagem = new Image();
+
+        imagem.src = CONFIG.caminhos.mapa + arquivo;
+
+    });
+
+}
+
+/*
+=========================================================
+CRIAR CAMADA SATÉLITE
+=========================================================
+*/
+
+function criarCamadaSatelite(){
+
+    camadaSatelite = L.tileLayer(
+
+        "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+
+        {
+
+            maxZoom:20,
+
+            crossOrigin:true,
+
+            keepBuffer:1,
+
+            updateWhenIdle:true,
+
+            updateWhenZooming:false,
+
+            noWrap:true,
+
+            unloadInvisibleTiles:true,
+
+            reuseTiles:true
+
+        }
+
+    );
+
+}
+
+/*
+=========================================================
+CRIAR CAMADA FUNDO
+=========================================================
+*/
+
+function criarCamadaFundo(){
+
+    camadaFundo = L.imageOverlay(
+
+        CONFIG.caminhos.mapa+"fundo.png",
+
+        LIMITES_OVERLAY,
+
+        {
+
+            pane:"fundo",
+
+            opacity:CONFIG.opacidade.fundo,
+
+            interactive:false
+
+        }
+
+    );
+
+}
+
+/*
+=========================================================
+CRIAR CAMADA MAPA
+=========================================================
+*/
+
+function criarCamadaMapa(){
+
+    camadaMapa = L.imageOverlay(
+
+        CONFIG.caminhos.mapa+"mapa.svg",
+
+        LIMITES_OVERLAY,
+
+        {
+
+            pane:"mapa",
+
+            opacity:CONFIG.opacidade.mapa,
+
+            interactive:false
+
+        }
+
+    );
+
+}
+
+/*
+=========================================================
+CRIAR CAMADA NOMES DAS RUAS
+=========================================================
+*/
+
+function criarCamadaNomesRuas(){
+
+    camadaNomesRuas = L.imageOverlay(
+
+        CONFIG.caminhos.mapa+"nomes-ruas.svg",
+
+        LIMITES_OVERLAY,
+
+        {
+
+            pane:"nomesRuas",
+
+            opacity:CONFIG.opacidade.nomesRuas,
+
+            interactive:false
+
+        }
+
+    );
+
+}
+
+/*
+=========================================================
+CRIAR CAMADA NOMES DOS BAIRROS
+=========================================================
+*/
+
+function criarCamadaNomesBairros(){
+
+    camadaNomesBairros = L.imageOverlay(
+
+        CONFIG.caminhos.mapa+"nomes-bairros.svg",
+
+        LIMITES_OVERLAY,
+
+        {
+
+            pane:"nomesBairros",
+
+            opacity:CONFIG.opacidade.nomesBairros,
+
+            interactive:false
+
+        }
+
+    );
+
+}
 /*
 =========================================================
 ADICIONAR CAMADA
@@ -446,7 +599,7 @@ ATIVAR PERGAMINHO
 
 async function ativarModoPergaminho(){
 
-    mapaIlustrado=true;
+    mapaIlustrado = true;
 
     mapa.setMaxZoom(
 
@@ -478,7 +631,7 @@ ATIVAR SATÉLITE
 
 async function ativarModoSatelite(){
 
-    mapaIlustrado=false;
+    mapaIlustrado = false;
 
     mapa.setMaxZoom(
 
@@ -514,7 +667,9 @@ async function alternarModoMapa(){
 
         await ativarModoSatelite();
 
-    }else{
+    }
+
+    else{
 
         await ativarModoPergaminho();
 
@@ -524,75 +679,77 @@ async function alternarModoMapa(){
 
 /*
 =========================================================
-ATUALIZAR VISIBILIDADE POR ZOOM
+VISIBILIDADE POR ZOOM
 =========================================================
 */
 
 function atualizarOpacidade(){
 
-    if(!mapaIlustrado) return;
+    if(!mapaIlustrado){
+
+        return;
+
+    }
 
     const zoom = mapa.getZoom();
 
     /*
-    RUAS
+    ---------------------------------------------------------
+    NOMES DAS RUAS
+    ---------------------------------------------------------
     */
 
-    if(zoom>=17.75){
+    if(zoom >= 17.75){
 
-        adicionarCamada(camadaNomesRuas);
+        adicionarCamada(
 
-    }else{
+            camadaNomesRuas
 
-        removerCamada(camadaNomesRuas);
+        );
+
+    }
+
+    else{
+
+        removerCamada(
+
+            camadaNomesRuas
+
+        );
 
     }
 
     /*
-    BAIRROS
+    ---------------------------------------------------------
+    NOMES DOS BAIRROS
+    ---------------------------------------------------------
     */
 
     if(
 
-        zoom>=17 &&
+        zoom >= 17 &&
 
-        zoom<19.75
+        zoom < 19.75
 
     ){
 
-        adicionarCamada(camadaNomesBairros);
+        adicionarCamada(
 
-    }else{
+            camadaNomesBairros
 
-        removerCamada(camadaNomesBairros);
+        );
 
     }
 
-}
+    else{
 
-/*
-=========================================================
-EVENTOS DO MAPA
-=========================================================
-*/
+        removerCamada(
 
-function registrarEventosMapa(){
+            camadaNomesBairros
 
-    mapa.off(
+        );
 
-        "zoomend",
-
-        atualizarOpacidade
-
-    );
-
-    mapa.on(
-
-        "zoomend",
-
-        atualizarOpacidade
-
-    );
+    }
 
 }
 /*
@@ -639,17 +796,7 @@ function definirZoom(zoom){
 
     }
 
-    mapa.setZoom(
-
-        zoom,
-
-        {
-
-            animate:true
-
-        }
-
-    );
+    mapa.setZoom(zoom);
 
 }
 
@@ -691,9 +838,7 @@ function centralizarMapa(
 
             animate:true,
 
-            duration:CONFIG.animacao,
-
-            easeLinearity:.25
+            duration:CONFIG.animacao
 
         }
 
@@ -703,7 +848,7 @@ function centralizarMapa(
 
 /*
 =========================================================
-LIMITES
+OBTER LIMITES
 =========================================================
 */
 
@@ -711,7 +856,7 @@ function obterLimitesMapa(){
 
     if(!mapa){
 
-        return CONFIG.limites;
+        return null;
 
     }
 
@@ -765,6 +910,30 @@ window.addEventListener(
 
 /*
 =========================================================
+RECALCULAR APÓS CARREGAMENTO
+=========================================================
+*/
+
+window.addEventListener(
+
+    "load",
+
+    ()=>{
+
+        if(mapa){
+
+            atualizarMapa();
+
+            atualizarOpacidade();
+
+        }
+
+    }
+
+);
+
+/*
+=========================================================
 API
 =========================================================
 */
@@ -790,28 +959,6 @@ window.mapaAPI={
     ativarModoSatelite
 
 };
-
-/*
-=========================================================
-INICIALIZAÇÃO DOS EVENTOS
-=========================================================
-*/
-
-document.addEventListener(
-
-    "DOMContentLoaded",
-
-    ()=>{
-
-        if(mapa){
-
-            registrarEventosMapa();
-
-        }
-
-    }
-
-);
 
 /*
 =========================================================
