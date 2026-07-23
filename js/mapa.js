@@ -84,11 +84,11 @@ const CONFIG = {
 
     zoomInicial:16,
 
-    zoomMinimo:16,
+    zoomMinimo:5,
 
     zoomMaximoPergaminho:20,
 
-    zoomMaximoSatelite:18,
+    zoomMaximoSatelite:16,
 
     animacao:.40,
 
