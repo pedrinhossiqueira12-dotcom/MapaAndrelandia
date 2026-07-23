@@ -42,9 +42,44 @@ CONFIGURAÇÃO
 
 const CONFIG = {
 
+    /*
+    ---------------------------------------------------------
+    LIMITES EXPORTADOS DO QGIS (EPSG:4326)
+    ---------------------------------------------------------
+    */
+
+    limites:[
+
+        [
+
+            -21.681117919,
+
+            -44.451251788
+
+        ],
+
+        [
+
+            -21.812963565,
+
+            -44.224268434
+
+        ]
+
+    ],
+
+    /*
+    ---------------------------------------------------------
+    CENTRO CALCULADO DOS LIMITES
+    ---------------------------------------------------------
+    */
+
     centro:[
-        -21.747040,
-        -44.337760
+
+        (-21.681117919 + -21.812963565) / 2,
+
+        (-44.451251788 + -44.224268434) / 2
+
     ],
 
     zoomInicial:16,
@@ -56,27 +91,6 @@ const CONFIG = {
     zoomMaximoSatelite:18,
 
     animacao:.40,
-
-    /*
-    =====================================================
-    LIMITES GEOREFERENCIADOS
-    EPSG:4326
-    =====================================================
-    */
-
-    limites:[
-
-        [
-            -21.812963563,
-            -44.451251796
-        ],
-
-        [
-            -21.681117919,
-            -44.224268434
-        ]
-
-    ],
 
     opacidade:{
 
@@ -104,6 +118,12 @@ const CONFIG = {
 
 };
 
+/*
+=========================================================
+TODOS OS OVERLAYS USAM O MESMO LIMITE
+=========================================================
+*/
+
 const LIMITES_OVERLAY = CONFIG.limites;
 
 /*
@@ -123,13 +143,19 @@ async function iniciarMapa(){
     await criarCamadas();
 
     mapa.off(
+
         "zoomend",
+
         atualizarOpacidade
+
     );
 
     mapa.on(
+
         "zoomend",
+
         atualizarOpacidade
+
     );
 
 }
@@ -148,21 +174,17 @@ function criarMapa(){
 
         {
 
-            zoomControl:false,
-
-            attributionControl:false,
-
-            preferCanvas:true,
-
             fadeAnimation:false,
 
             zoomAnimation:true,
 
             markerZoomAnimation:false,
 
-            zoomSnap:.25,
+            zoomControl:false,
 
-            zoomDelta:.25,
+            attributionControl:false,
+
+            preferCanvas:true,
 
             minZoom:CONFIG.zoomMinimo,
 
@@ -171,6 +193,10 @@ function criarMapa(){
             maxBounds:CONFIG.limites,
 
             maxBoundsViscosity:1,
+
+            zoomSnap:.25,
+
+            zoomDelta:.25,
 
             inertia:true,
 
@@ -182,6 +208,12 @@ function criarMapa(){
 
     );
 
+    /*
+    ---------------------------------------------------------
+    CENTRALIZA PELO CENTRO REAL DO MAPA
+    ---------------------------------------------------------
+    */
+
     mapa.setView(
 
         CONFIG.centro,
@@ -190,20 +222,45 @@ function criarMapa(){
 
     );
 
+    /*
+    ---------------------------------------------------------
+    AJUSTA O MAPA AO TAMANHO DA IMAGEM EXPORTADA
+    ---------------------------------------------------------
+    */
+
     mapa.fitBounds(
 
-        CONFIG.limites
+        CONFIG.limites,
+
+        {
+
+            animate:false,
+
+            padding:[0,0]
+
+        }
 
     );
 
+    /*
+    ---------------------------------------------------------
+    IMPEDE SAIR DA ÁREA EXPORTADA
+    ---------------------------------------------------------
+    */
+
     mapa.panInsideBounds(
 
-        CONFIG.limites
+        CONFIG.limites,
+
+        {
+
+            animate:false
+
+        }
 
     );
 
 }
-
 /*
 =========================================================
 CRIAR PANES
@@ -213,20 +270,43 @@ CRIAR PANES
 function criarPanes(){
 
     mapa.createPane("fundo");
-
     mapa.createPane("mapa");
-
     mapa.createPane("nomesRuas");
-
     mapa.createPane("nomesBairros");
 
     mapa.getPane("fundo").style.zIndex = 200;
-
     mapa.getPane("mapa").style.zIndex = 210;
-
     mapa.getPane("nomesRuas").style.zIndex = 220;
-
     mapa.getPane("nomesBairros").style.zIndex = 230;
+
+    /*
+    ---------------------------------------------------------
+    OTIMIZAÇÃO DAS PANES
+    ---------------------------------------------------------
+    */
+
+    [
+
+        "fundo",
+
+        "mapa",
+
+        "nomesRuas",
+
+        "nomesBairros"
+
+    ].forEach(nome=>{
+
+        const pane = mapa.getPane(nome);
+
+        pane.style.pointerEvents = "none";
+        pane.style.userSelect = "none";
+        pane.style.willChange = "transform";
+        pane.style.transformOrigin = "center center";
+        pane.style.backfaceVisibility = "hidden";
+        pane.style.contain = "layout style paint";
+
+    });
 
 }
 
@@ -262,7 +342,7 @@ OTIMIZAR CAMADAS
 
 function otimizarCamadas(){
 
-    const camadas = [
+    [
 
         camadaFundo,
 
@@ -272,9 +352,7 @@ function otimizarCamadas(){
 
         camadaNomesBairros
 
-    ];
-
-    camadas.forEach(camada=>{
+    ].forEach(camada=>{
 
         if(!camada){
 
@@ -292,15 +370,26 @@ function otimizarCamadas(){
 
             }
 
-            elemento.style.pointerEvents="none";
+            elemento.style.pointerEvents = "none";
+            elemento.style.userSelect = "none";
+            elemento.style.willChange = "transform";
+            elemento.style.transformOrigin = "center center";
+            elemento.style.backfaceVisibility = "hidden";
 
-            elemento.style.userSelect="none";
+            /*
+            -----------------------------------------------------
+            PNG COM MELHOR QUALIDADE
+            -----------------------------------------------------
+            */
 
-            elemento.style.willChange="transform";
+            if(elemento.tagName==="IMG"){
 
-            elemento.style.transformOrigin="center center";
+                elemento.draggable = false;
+                elemento.style.maxWidth = "none";
+                elemento.style.maxHeight = "none";
+                elemento.style.imageRendering = "auto";
 
-            elemento.style.backfaceVisibility="hidden";
+            }
 
         });
 
@@ -310,7 +399,45 @@ function otimizarCamadas(){
 
 /*
 =========================================================
-PRÉ-CARREGAR IMAGENS
+CAMADA SATÉLITE
+=========================================================
+*/
+
+function criarCamadaSatelite(){
+
+    camadaSatelite = L.tileLayer(
+
+        "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+
+        {
+
+            maxZoom:20,
+
+            crossOrigin:true,
+
+            keepBuffer:4,
+
+            updateWhenIdle:true,
+
+            updateWhenZooming:false,
+
+            reuseTiles:true,
+
+            noWrap:true,
+
+            detectRetina:true,
+
+            unloadInvisibleTiles:true
+
+        }
+
+    );
+
+}
+
+/*
+=========================================================
+PRÉ CARREGAR IMAGENS
 =========================================================
 */
 
@@ -328,9 +455,13 @@ function preloadImagens(){
 
     ].forEach(arquivo=>{
 
-        const imagem = new Image();
+        const img = new Image();
 
-        imagem.src = CONFIG.caminhos.mapa + arquivo;
+        img.decoding = "async";
+
+        img.loading = "eager";
+
+        img.src = CONFIG.caminhos.mapa + arquivo;
 
     });
 
@@ -338,43 +469,7 @@ function preloadImagens(){
 
 /*
 =========================================================
-CRIAR CAMADA SATÉLITE
-=========================================================
-*/
-
-function criarCamadaSatelite(){
-
-    camadaSatelite = L.tileLayer(
-
-        "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-
-        {
-
-            maxZoom:20,
-
-            crossOrigin:true,
-
-            keepBuffer:1,
-
-            updateWhenIdle:true,
-
-            updateWhenZooming:false,
-
-            noWrap:true,
-
-            unloadInvisibleTiles:true,
-
-            reuseTiles:true
-
-        }
-
-    );
-
-}
-
-/*
-=========================================================
-CRIAR CAMADA FUNDO
+FUNDO
 =========================================================
 */
 
@@ -382,7 +477,7 @@ function criarCamadaFundo(){
 
     camadaFundo = L.imageOverlay(
 
-        CONFIG.caminhos.mapa+"fundo.png",
+        CONFIG.caminhos.mapa + "fundo.png",
 
         LIMITES_OVERLAY,
 
@@ -402,7 +497,7 @@ function criarCamadaFundo(){
 
 /*
 =========================================================
-CRIAR CAMADA MAPA
+MAPA
 =========================================================
 */
 
@@ -410,7 +505,7 @@ function criarCamadaMapa(){
 
     camadaMapa = L.imageOverlay(
 
-        CONFIG.caminhos.mapa+"mapa.svg",
+        CONFIG.caminhos.mapa + "mapa.svg",
 
         LIMITES_OVERLAY,
 
@@ -430,7 +525,7 @@ function criarCamadaMapa(){
 
 /*
 =========================================================
-CRIAR CAMADA NOMES DAS RUAS
+NOMES DAS RUAS
 =========================================================
 */
 
@@ -438,7 +533,7 @@ function criarCamadaNomesRuas(){
 
     camadaNomesRuas = L.imageOverlay(
 
-        CONFIG.caminhos.mapa+"nomes-ruas.svg",
+        CONFIG.caminhos.mapa + "nomes-ruas.svg",
 
         LIMITES_OVERLAY,
 
@@ -458,7 +553,7 @@ function criarCamadaNomesRuas(){
 
 /*
 =========================================================
-CRIAR CAMADA NOMES DOS BAIRROS
+NOMES DOS BAIRROS
 =========================================================
 */
 
@@ -466,7 +561,7 @@ function criarCamadaNomesBairros(){
 
     camadaNomesBairros = L.imageOverlay(
 
-        CONFIG.caminhos.mapa+"nomes-bairros.svg",
+        CONFIG.caminhos.mapa + "nomes-bairros.svg",
 
         LIMITES_OVERLAY,
 
@@ -493,15 +588,17 @@ function adicionarCamada(camada){
 
     if(
 
-        camada &&
+        !camada ||
 
-        !mapa.hasLayer(camada)
+        mapa.hasLayer(camada)
 
     ){
 
-        camada.addTo(mapa);
+        return;
 
     }
+
+    camada.addTo(mapa);
 
 }
 
@@ -515,15 +612,17 @@ function removerCamada(camada){
 
     if(
 
-        camada &&
+        !camada ||
 
-        mapa.hasLayer(camada)
+        !mapa.hasLayer(camada)
 
     ){
 
-        mapa.removeLayer(camada);
+        return;
 
     }
+
+    mapa.removeLayer(camada);
 
 }
 
@@ -553,7 +652,11 @@ AGUARDAR
 
 function esperar(ms){
 
-    return new Promise(resolve=>setTimeout(resolve,ms));
+    return new Promise(resolve=>{
+
+        setTimeout(resolve,ms);
+
+    });
 
 }
 
@@ -565,13 +668,25 @@ CARREGAR PERGAMINHO
 
 async function carregarPergaminho(){
 
-    removerCamada(camadaSatelite);
+    removerCamada(
 
-    adicionarCamada(camadaFundo);
+        camadaSatelite
+
+    );
+
+    adicionarCamada(
+
+        camadaFundo
+
+    );
 
     await esperar(10);
 
-    adicionarCamada(camadaMapa);
+    adicionarCamada(
+
+        camadaMapa
+
+    );
 
     atualizarOpacidade();
 
@@ -587,7 +702,11 @@ async function carregarSatelite(){
 
     removerCamadasIlustradas();
 
-    adicionarCamada(camadaSatelite);
+    adicionarCamada(
+
+        camadaSatelite
+
+    );
 
 }
 
@@ -679,13 +798,19 @@ async function alternarModoMapa(){
 
 /*
 =========================================================
-VISIBILIDADE POR ZOOM
+ATUALIZAR VISIBILIDADE
 =========================================================
 */
 
 function atualizarOpacidade(){
 
-    if(!mapaIlustrado){
+    if(
+
+        !mapa ||
+
+        !mapaIlustrado
+
+    ){
 
         return;
 
@@ -750,6 +875,32 @@ function atualizarOpacidade(){
         );
 
     }
+
+}
+
+/*
+=========================================================
+EVENTO DE ZOOM
+=========================================================
+*/
+
+function registrarEventosMapa(){
+
+    mapa.off(
+
+        "zoomend",
+
+        atualizarOpacidade
+
+    );
+
+    mapa.on(
+
+        "zoomend",
+
+        atualizarOpacidade
+
+    );
 
 }
 /*
@@ -838,7 +989,9 @@ function centralizarMapa(
 
             animate:true,
 
-            duration:CONFIG.animacao
+            duration:CONFIG.animacao,
+
+            easeLinearity:.25
 
         }
 
@@ -848,7 +1001,7 @@ function centralizarMapa(
 
 /*
 =========================================================
-OBTER LIMITES
+LIMITES
 =========================================================
 */
 
@@ -882,7 +1035,9 @@ function atualizarMapa(){
 
         {
 
-            animate:false
+            animate:false,
+
+            pan:false
 
         }
 
@@ -910,27 +1065,27 @@ window.addEventListener(
 
 /*
 =========================================================
-RECALCULAR APÓS CARREGAMENTO
+CARREGAMENTO COMPLETO
 =========================================================
 */
 
-window.addEventListener(
+mapaQuandoPronto();
 
-    "load",
+async function mapaQuandoPronto(){
 
-    ()=>{
+    if(!mapa){
 
-        if(mapa){
-
-            atualizarMapa();
-
-            atualizarOpacidade();
-
-        }
+        return;
 
     }
 
-);
+    await esperar(30);
+
+    atualizarMapa();
+
+    atualizarOpacidade();
+
+}
 
 /*
 =========================================================
@@ -938,7 +1093,7 @@ API
 =========================================================
 */
 
-window.mapaAPI={
+window.mapaAPI = {
 
     obterMapa,
 
